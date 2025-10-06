@@ -1,0 +1,207 @@
+20:18:07 30/07/2025 - error: Failed to start Discord client: Used disallowed intents
+20:19:45 30/07/2025 - info: Discord client started successfully.
+20:19:45 30/07/2025 - info: Discord client started as Dot test#0248
+20:22:29 30/07/2025 - error: ❌ Failed to register matchLogs commands: Expected token to be set for this request, but none was present
+20:22:29 30/07/2025 - error: Failed to register commands for matchLogs: Expected token to be set for this request, but none was present
+20:23:57 30/07/2025 - info: Discord client started successfully.
+20:23:58 30/07/2025 - info: Discord client started as Dot test#0248
+20:24:14 30/07/2025 - error: ❌ Failed to register matchLogs commands: Invalid Form Body
+application_id[NUMBER_TYPE_COERCE]: Value "undefined" is not snowflake.
+20:24:14 30/07/2025 - error: Failed to register commands for matchLogs: Invalid Form Body
+application_id[NUMBER_TYPE_COERCE]: Value "undefined" is not snowflake.
+20:28:03 30/07/2025 - info: Discord client started successfully.
+20:28:03 30/07/2025 - info: Discord client started as Dot test#0248
+20:28:35 30/07/2025 - info: ✅ Registered ticketTool commands in guild 1400120391497945260
+20:43:57 30/07/2025 - info: Discord client started successfully.
+20:43:57 30/07/2025 - info: Discord client started as Dot test#0248
+20:44:18 30/07/2025 - error: Operation `ticketconfigs.findOneAndUpdate()` buffering timed out after 10000ms
+20:45:44 30/07/2025 - info: Discord client started as Dot test#0248
+20:45:44 30/07/2025 - info: Discord client started successfully.
+20:57:14 30/07/2025 - info: Discord client started as Dot test#0248
+20:57:14 30/07/2025 - info: Discord client started successfully.
+21:02:01 30/07/2025 - info: Discord client started successfully.
+21:02:02 30/07/2025 - info: Discord client started as Dot test#0248
+21:10:24 30/07/2025 - info: Discord client started successfully.
+21:10:24 30/07/2025 - info: Discord client started as Dot test#0248
+07:53:26 31/07/2025 - info: Discord client started successfully.
+07:53:26 31/07/2025 - info: Discord client started as Dot test#0248
+07:58:28 31/07/2025 - info: Discord client started successfully.
+07:58:28 31/07/2025 - info: Discord client started as Dot test#0248
+08:02:39 31/07/2025 - info: Discord client started successfully.
+08:02:39 31/07/2025 - info: Discord client started as Dot test#0248
+08:04:25 31/07/2025 - info: Discord client started successfully.
+08:04:25 31/07/2025 - info: Discord client started as Dot test#0248
+08:06:59 31/07/2025 - info: Discord client started successfully.
+08:07:00 31/07/2025 - info: Discord client started as Dot test#0248
+08:14:12 31/07/2025 - info: Discord client started successfully.
+08:14:12 31/07/2025 - info: Discord client started as Dot test#0248
+08:14:28 31/07/2025 - info: Discord client started successfully.
+08:14:28 31/07/2025 - info: Discord client started as Dot test#0248
+08:16:20 31/07/2025 - info: Discord client started successfully.
+08:16:21 31/07/2025 - info: Discord client started as Dot test#0248
+08:38:04 31/07/2025 - info: Discord client started successfully.
+08:38:04 31/07/2025 - info: Discord client started as Dot test#0248
+09:02:18 31/07/2025 - info: Discord client started successfully.
+09:02:18 31/07/2025 - info: Discord client started as Dot test#0248
+09:15:30 31/07/2025 - info: Discord client started successfully.
+09:15:30 31/07/2025 - info: Discord client started as Dot test#0248
+09:17:26 31/07/2025 - info: Discord client started successfully.
+09:17:26 31/07/2025 - info: Discord client started as Dot test#0248
+09:19:09 31/07/2025 - info: Discord client started successfully.
+09:19:09 31/07/2025 - info: Discord client started as Dot test#0248
+09:38:36 31/07/2025 - info: Discord client started successfully.
+09:38:36 31/07/2025 - info: Discord client started as Dot test#0248
+09:42:15 31/07/2025 - info: Discord client started successfully.
+09:42:15 31/07/2025 - info: Discord client started as Dot test#0248
+09:43:24 31/07/2025 - info: Discord client started successfully.
+09:43:24 31/07/2025 - info: Discord client started as Dot test#0248
+09:48:07 31/07/2025 - info: Discord client started successfully.
+09:48:07 31/07/2025 - info: Discord client started as Dot test#0248
+09:54:40 31/07/2025 - info: Discord client started successfully.
+09:54:40 31/07/2025 - info: Discord client started as Dot test#0248
+09:56:17 31/07/2025 - info: Discord client started successfully.
+09:56:17 31/07/2025 - info: Discord client started as Dot test#0248
+09:57:44 31/07/2025 - info: Discord client started successfully.
+09:57:44 31/07/2025 - info: Discord client started as Dot test#0248
+09:59:38 31/07/2025 - info: Discord client started successfully.
+09:59:38 31/07/2025 - info: Discord client started as Dot test#0248
+09:59:54 31/07/2025 - info: ✅ Registered ticket_tool commands in guild 1400120391497945260
+10:09:25 31/07/2025 - info: Discord client started successfully.
+10:09:25 31/07/2025 - info: Discord client started as Dot test#0248
+10:11:47 31/07/2025 - info: Discord client started as Dot test#0248
+10:11:47 31/07/2025 - info: Discord client started successfully.
+10:15:12 31/07/2025 - info: Discord client started successfully.
+10:15:12 31/07/2025 - info: Discord client started as Dot test#0248
+10:16:19 31/07/2025 - info: Discord client started successfully.
+10:16:19 31/07/2025 - info: Discord client started as Dot test#0248
+11:19:54 31/07/2025 - info: Discord client started successfully.
+11:19:54 31/07/2025 - info: Discord client started as Dot test#0248
+11:22:20 31/07/2025 - info: Discord client started successfully.
+11:22:20 31/07/2025 - info: Discord client started as Dot test#0248
+11:26:32 31/07/2025 - info: Discord client started successfully.
+11:26:32 31/07/2025 - info: Discord client started as Dot test#0248
+11:31:08 31/07/2025 - info: Discord client started successfully.
+11:31:08 31/07/2025 - info: Discord client started as Dot test#0248
+11:46:05 31/07/2025 - info: Discord client started successfully.
+11:46:05 31/07/2025 - info: Discord client started as Dot test#0248
+11:50:13 31/07/2025 - info: Discord client started as Dot test#0248
+11:50:13 31/07/2025 - info: Discord client started successfully.
+11:55:45 31/07/2025 - info: Discord client started successfully.
+11:55:45 31/07/2025 - info: Discord client started as Dot test#0248
+11:56:20 31/07/2025 - info: Discord client started successfully.
+11:56:20 31/07/2025 - info: Discord client started as Dot test#0248
+12:07:48 31/07/2025 - info: Discord client started successfully.
+12:07:48 31/07/2025 - info: Discord client started as Dot test#0248
+12:12:35 31/07/2025 - info: Discord client started successfully.
+12:12:36 31/07/2025 - info: Discord client started as Dot test#0248
+12:20:11 31/07/2025 - info: Discord client started successfully.
+12:20:12 31/07/2025 - info: Discord client started as Dot test#0248
+12:29:02 31/07/2025 - info: Discord client started successfully.
+12:29:02 31/07/2025 - info: Discord client started as Dot test#0248
+12:33:38 31/07/2025 - info: Discord client started successfully.
+12:33:39 31/07/2025 - info: Discord client started as Dot test#0248
+12:38:39 31/07/2025 - info: Discord client started successfully.
+12:38:40 31/07/2025 - info: Discord client started as Dot test#0248
+12:42:36 31/07/2025 - error: ❌ Failed to delete ticket_tool command undefined: Invalid Form Body
+command_id[NUMBER_TYPE_COERCE]: Value "undefined" is not snowflake.
+12:42:36 31/07/2025 - error: Failed to register commands for ticket_tool: Invalid Form Body
+command_id[NUMBER_TYPE_COERCE]: Value "undefined" is not snowflake.
+13:31:41 31/07/2025 - info: Discord client started successfully.
+13:31:41 31/07/2025 - info: Discord client started as Dot test#0248
+13:33:09 31/07/2025 - info: Discord client started successfully.
+13:33:09 31/07/2025 - info: Discord client started as Dot test#0248
+13:38:24 31/07/2025 - info: Discord client started successfully.
+13:38:24 31/07/2025 - info: Discord client started as Dot test#0248
+13:40:55 31/07/2025 - info: Discord client started successfully.
+13:40:56 31/07/2025 - info: Discord client started as Dot test#0248
+13:41:42 31/07/2025 - info: Discord client started successfully.
+13:41:42 31/07/2025 - info: Discord client started as Dot test#0248
+13:44:35 31/07/2025 - info: Discord client started successfully.
+13:44:35 31/07/2025 - info: Discord client started as Dot test#0248
+13:49:33 31/07/2025 - info: Discord client started successfully.
+13:49:33 31/07/2025 - info: Discord client started as Dot test#0248
+14:00:03 31/07/2025 - error: ❌ Failed to register ticket_tool commands in guild 1400120391497945260: Cannot read properties of undefined (reading 'toJSON')
+14:00:03 31/07/2025 - error: Failed to register or delete commands for ticket_tool: Cannot read properties of undefined (reading 'toJSON')
+14:06:21 31/07/2025 - info: Discord client started successfully.
+14:06:21 31/07/2025 - info: Discord client started as Dot test#0248
+14:07:10 31/07/2025 - error: ❌ Failed to register ticket_tool commands in guild 1400120391497945260: Invalid Form Body
+application_id[NUMBER_TYPE_COERCE]: Value "undefined" is not snowflake.
+14:07:10 31/07/2025 - error: Failed to register or delete commands for ticket_tool: Invalid Form Body
+application_id[NUMBER_TYPE_COERCE]: Value "undefined" is not snowflake.
+14:08:52 31/07/2025 - info: ✅ Registered ticket_tool commands in guild 1400120391497945260
+14:15:33 31/07/2025 - info: Channel deleted: closed-1 (1400395050063757352) in guild hello world's server (1400120391497945260)
+14:24:07 31/07/2025 - info: Discord client started successfully.
+14:24:07 31/07/2025 - info: Discord client started as Dot test#0248
+18:06:04 31/07/2025 - info: Discord client started successfully.
+18:06:04 31/07/2025 - info: Discord client started as Dot test#0248
+18:06:53 31/07/2025 - info: Discord client started successfully.
+18:06:53 31/07/2025 - info: Discord client started as Dot test#0248
+18:09:01 31/07/2025 - info: ✅ Registered ticket_tool commands in guild 1400120391497945260
+18:09:45 31/07/2025 - info: ✅ Registered match_logs commands in guild 1400120391497945260
+10:14:50 02/08/2025 - info: ✅ Registered ticket_tool commands in guild 1400120391497945260
+11:31:10 09/08/2025 - info: Discord client started successfully.
+11:31:10 09/08/2025 - info: Discord client started as Dot test#0248
+11:41:05 09/08/2025 - info: Discord client started successfully.
+11:41:05 09/08/2025 - info: Discord client started as Dot test#0248
+11:42:32 09/08/2025 - info: Discord client started successfully.
+11:42:32 09/08/2025 - info: Discord client started as Dot test#0248
+11:44:54 09/08/2025 - info: Discord client started successfully.
+11:44:54 09/08/2025 - info: Discord client started as Dot test#0248
+11:45:42 09/08/2025 - info: Discord client started successfully.
+11:45:42 09/08/2025 - info: Discord client started as Dot test#0248
+16:36:37 09/08/2025 - info: Discord client started successfully.
+16:36:37 09/08/2025 - info: Discord client started as Dot test#0248
+16:36:57 09/08/2025 - info: Discord client started successfully.
+16:36:57 09/08/2025 - info: Discord client started as Dot test#0248
+20:39:17 12/08/2025 - info: Discord client started successfully.
+20:39:17 12/08/2025 - info: Discord client started as Dot test#0248
+20:40:54 12/08/2025 - info: Discord client started successfully.
+20:40:54 12/08/2025 - info: Discord client started as Dot test#0248
+12:40:58 13/08/2025 - info: Discord client started successfully.
+12:40:58 13/08/2025 - info: Discord client started as Dot test#0248
+13:36:53 13/08/2025 - info: Discord client started successfully.
+13:36:53 13/08/2025 - info: Discord client started as Dot test#0248
+14:07:36 13/08/2025 - info: Discord client started successfully.
+14:07:36 13/08/2025 - info: Discord client started as Dot test#0248
+14:15:45 13/08/2025 - info: Discord client started successfully.
+14:15:45 13/08/2025 - info: Discord client started as Dot test#0248
+14:15:13 19/09/2025 - info: Discord client started successfully.
+14:15:13 19/09/2025 - info: Discord client started as Dot test#0248
+16:01:33 19/09/2025 - info: Discord client started successfully.
+16:01:33 19/09/2025 - info: Discord client started as Dot test#0248
+17:57:24 19/09/2025 - info: Discord client started successfully.
+17:57:24 19/09/2025 - info: Discord client started as Dot test#0248
+18:20:54 19/09/2025 - info: Discord client started successfully.
+18:20:54 19/09/2025 - info: Discord client started as Dot test#0248
+18:33:16 19/09/2025 - info: Discord client started successfully.
+18:33:16 19/09/2025 - info: Discord client started as Dot test#0248
+18:34:00 19/09/2025 - info: Discord client started successfully.
+18:34:00 19/09/2025 - info: Discord client started as Dot test#0248
+07:31:07 21/09/2025 - info: Discord client started successfully.
+07:31:08 21/09/2025 - info: Discord client started as Dot test#0248
+17:29:57 23/09/2025 - info: Discord client started successfully.
+17:29:57 23/09/2025 - info: Discord client started as Dot test#0248
+22:53:43 30/09/2025 - info: Discord client started successfully.
+22:53:43 30/09/2025 - info: Discord client started as Dot test#0248
+07:52:00 01/10/2025 - info: Discord client started successfully.
+07:52:00 01/10/2025 - info: Discord client started as Dot test#0248
+11:01:15 01/10/2025 - info: Discord client started successfully.
+11:01:15 01/10/2025 - info: Discord client started as Dot test#0248
+11:30:33 01/10/2025 - info: Discord client started successfully.
+11:30:33 01/10/2025 - info: Discord client started as Dot test#0248
+11:34:21 01/10/2025 - info: Discord client started successfully.
+11:34:21 01/10/2025 - info: Discord client started as Dot test#0248
+11:40:19 01/10/2025 - info: Discord client started successfully.
+11:40:19 01/10/2025 - info: Discord client started as Dot test#0248
+11:49:41 01/10/2025 - info: Discord client started successfully.
+11:49:41 01/10/2025 - info: Discord client started as Dot test#0248
+11:53:40 01/10/2025 - info: Discord client started successfully.
+11:53:40 01/10/2025 - info: Discord client started as Dot test#0248
+07:52:30 02/10/2025 - info: Discord client started successfully.
+07:52:30 02/10/2025 - info: Discord client started as Dot test#0248
+09:37:48 02/10/2025 - info: Discord client started successfully.
+09:37:48 02/10/2025 - info: Discord client started as Dot test#0248
+10:38:31 03/10/2025 - info: Discord client started successfully.
+10:38:31 03/10/2025 - info: Discord client started as Dot test#0248
+08:46:30 05/10/2025 - info: Discord client started successfully.
+08:46:31 05/10/2025 - info: Discord client started as Dot test#0248
