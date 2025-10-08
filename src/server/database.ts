@@ -1,8 +1,12 @@
 'use server';
 
-import { EventDB, Group, IEvent, IStage, Player, Schedule, Stage, Team } from "@/lib/database/schema";
+import { EventDB, Group, IEvent, IStage, Player, RoleManagerUser, Schedule, Stage, Team } from "@/lib/database/schema";
 import { dbConnect } from "@/lib/db"
 import mongoose from "mongoose";
+import { getServerSession } from "next-auth";
+import { authConfig } from "./auth";
+import { User } from "@/lib/database/user";
+import { Guild } from "@/lib/database/guild";
 
 export type Schedule = { id: string; matchNo: number; map: string; startTime: string; date: string }
 export type GroupAndSchedule = {
@@ -36,8 +40,18 @@ export type ScheduleData = {
 }
 
 export async function getEventData(): Promise<EventData[]> {
+  const session = await getServerSession(authConfig)
   await dbConnect()
-  const events = await EventDB.find() as IEvent[]
+  if (!session?.user?.id) return []
+  const userDoc = await User.findById(session.user.id);
+  if (!userDoc) return []
+  let events: IEvent[] = []
+  if (!userDoc.superUser) {
+    events = await EventDB.find({ _id: { $in: userDoc.events } }) as IEvent[]
+  } else {
+    events = await EventDB.find() as IEvent[]
+  }
+
   const result: EventData[] = []
   for (const e of events) {
     const stages = await Stage.find({ event: e._id }) as IStage[]
@@ -88,9 +102,14 @@ export async function getGroupAndSchedule(
 
 export async function ImportDataDB(
   rows: any[],
-  type: "event" | "schedule",
+  type: "event" | "schedule" | "discordRoleData",
 ): Promise<{ status: "success" | "error"; message: string }> {
   try {
+    const session = await getServerSession(authConfig);
+    if (!session?.user?.id) return { status: "error", message: "Unauthorized" };
+    const userDoc = await User.findById(session.user.id);
+    if (!userDoc?.superUser) return { status: "error", message: "Unauthorized" };
+
     await dbConnect();
 
     if (type === "event") {
@@ -115,6 +134,11 @@ export async function ImportDataDB(
           { $addToSet: { stages: stage._id } }
         );
 
+        if (!userDoc.events.map((e: mongoose.Types.ObjectId) => e.toString()).includes(event._id.toString())) {
+          (userDoc.events as mongoose.Types.ObjectId[]).push(event._id as mongoose.Types.ObjectId);
+          await userDoc.save();
+        }
+
         // 3. Group
         const group = await Group.findOneAndUpdate(
           { name: r.group, stage: stage._id, event: event._id },
@@ -131,6 +155,7 @@ export async function ImportDataDB(
         if (!team) {
           team = await Team.create({
             name: r.team,
+            tag: r.tag,
             email: r.email,
             slot: r.slot,
             event: event._id,
@@ -234,6 +259,87 @@ export async function ImportDataDB(
       }
 
       return { status: "success", message: "Schedule data imported successfully" };
+    }
+
+    if (type === "discordRoleData") {
+      for (const r of rows) {
+        if (!r.emailId || !r.guildId || !r.rolePlayer || !r.discordTag) continue;
+        console.log(r);
+        
+        const event = await EventDB.findOneAndUpdate(
+          { name: r.event },
+          { $setOnInsert: { name: r.event } },
+          { new: true, upsert: true }
+        );
+
+        const stage = await Stage.findOneAndUpdate(
+          { name: r.stage, event: event._id },
+          { $setOnInsert: { name: r.stage, event: event._id } },
+          { new: true, upsert: true }
+        );
+
+        await EventDB.updateOne(
+          { _id: event._id },
+          { $addToSet: { stages: stage._id } }
+        );
+
+        const teamDoc = await Team.findOneAndUpdate(
+          { name: r.teamName, stage: stage._id },
+          { $setOnInsert: { name: r.teamName, tag: r.teamTag, event: event._id, stage: stage._id } },
+          { new: true, upsert: true }
+        );
+        console.log({ teamDoc });
+        
+        const playerDoc = await Player.findOneAndUpdate(
+          { uid: r.uid, email: r.emailId },
+          { $setOnInsert: { uid: r.uid, email: r.emailId, team: teamDoc._id } },
+          { new: true, upsert: true }
+        );
+        console.log({ playerDoc });
+        
+        const guildDoc = await Guild.findOneAndUpdate(
+          { guildId: r.guildId },
+          {
+            $setOnInsert: { guildId: r.guildId, guildName: r.guildName, roleManager: true },
+            $addToSet: { events: event._id }
+          },
+          { new: true, upsert: true }
+        );
+
+        console.log({ event, stage, teamDoc, playerDoc, guildDoc });
+        
+
+        await User.updateOne({ _id: userDoc._id }, { $addToSet: { events: event._id, guilds: guildDoc._id } });
+
+        const roleManagerUser = await RoleManagerUser.findOneAndUpdate(
+          { userName: r.discordTag, guild: guildDoc._id },
+          {
+            $set: {
+              userName: r.discordTag,
+              email: r.emailId,
+              team: teamDoc ? teamDoc._id : null,
+              player: playerDoc ? playerDoc._id : null,
+              guild: guildDoc._id,
+              serverJoined: false,
+              role: [r.rolePlayer ? 'Player' : false, r.roleOwner ? 'Owner' : false,  r.roleExtra, r.teamName].filter(Boolean).map(r => r.trim())
+            },
+          },
+          { new: true, upsert: true }
+        );
+
+        await Team.updateOne(
+          { _id: teamDoc._id },
+          { $addToSet: { players: playerDoc._id, discordUsers: roleManagerUser._id } }
+        );
+
+        await Player.updateOne(
+          { _id: playerDoc._id },
+          { $addToSet: { discord: roleManagerUser._id } }
+        );
+
+        await guildDoc.updateOne({ $addToSet: { users: roleManagerUser._id } });
+      }
+      return { status: "success", message: "Discord Role Manager data imported successfully" };
     }
 
     return { status: "error", message: "Unknown import type" };

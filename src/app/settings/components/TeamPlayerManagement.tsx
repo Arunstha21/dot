@@ -17,8 +17,8 @@ import {
 } from "@/components/ui/dialog"
 import { Loader2, Pencil, Trash2 } from "lucide-react"
 import { deleteTeamAction, getTeamsByGroup, updateTeamAction } from "@/server/actions/teams-actions"
-import { toast } from "sonner"
 import { deletePlayerAction, updatePlayerAction } from "@/server/actions/player-actions"
+import { toast } from "sonner"
 
 interface Player {
   _id: string
@@ -62,9 +62,7 @@ export default function TeamsPlayersManagement({
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null)
 
   useEffect(() => {
-    if (selectedGroup) {
-      loadTeams()
-    }
+    if (selectedGroup) loadTeams()
   }, [selectedGroup])
 
   const loadTeams = async () => {
@@ -133,7 +131,6 @@ export default function TeamsPlayersManagement({
       if (updates.gacPassword !== undefined) formData.append("gacPassword", updates.gacPassword)
       if (updates.gacInGameName !== undefined) formData.append("gacIngameName", updates.gacInGameName)
 
-      // Pass a dummy ActionResult as the first argument (or use null/{} if allowed)
       const result = await updatePlayerAction({} as any, formData)
       if (result.status === "success") {
         toast.success("Player updated successfully")
@@ -182,100 +179,115 @@ export default function TeamsPlayersManagement({
           <p className="text-center text-muted-foreground py-8">No teams found in this group</p>
         ) : (
           <Accordion type="single" collapsible className="space-y-4">
-            {teams.map((team) => (
-              <AccordionItem key={team._id} value={team._id} className="border rounded-lg px-4">
-                <AccordionTrigger className="hover:no-underline">
-                  <div className="flex items-center justify-between w-full pr-4">
-                    <div className="flex items-center gap-4">
-                      <span className="font-semibold">Slot {team.slot}</span>
-                      <span className="font-medium">{team.name}</span>
-                      {team.email && <span className="text-sm text-muted-foreground">({team.email})</span>}
-                      {team.tag && <span className="text-sm text-muted-foreground">[{team.tag}]</span>}
+          {teams.map((team) => (
+            <AccordionItem key={team._id} value={team._id} className="border rounded-lg px-4">
+              <div className="flex">
+                <div className="w-full items-center py-2 px-2 hover:bg-muted/50 rounded-md">
+                  {/* Accordion Trigger - full width (flex-grow to fill all available space) */}
+                  <AccordionTrigger
+                    className="flex-1 flex items-center p-2 rounded-md text-left hover:no-underline"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full">
+                      <div className="flex items-center gap-3">
+                        <span className="font-semibold text-sm sm:text-base">Slot {team.slot}</span>
+                        <span className="font-medium text-sm sm:text-base">{team.name}</span>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                        {team.tag && <span>[{team.tag}]</span>}
+                        {team.email && <span>{team.email}</span>}
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              setEditingTeam(team)
-                            }}
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent onClick={(e) => e.stopPropagation()}>
-                          <DialogHeader>
-                            <DialogTitle>Edit Team</DialogTitle>
-                            <DialogDescription>Update team information</DialogDescription>
-                          </DialogHeader>
-                          <TeamEditForm
-                            team={editingTeam || team}
-                            onSave={(updates) => handleUpdateTeam(team._id, updates)}
-                            onCancel={() => setEditingTeam(null)}
-                          />
-                        </DialogContent>
-                      </Dialog>
+                  </AccordionTrigger>
+                </div>
+                  {/* Action Buttons (fixed at right corner) */}
+                <div className="flex items-center gap-1 ml-3 shrink-0">
+                  {/* Edit Team Dialog */}
+                  <Dialog>
+                    <DialogTrigger asChild>
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={(e) => {
                           e.stopPropagation()
-                          handleDeleteTeam(team._id)
+                          setEditingTeam(team)
                         }}
                       >
-                        <Trash2 className="h-4 w-4 text-destructive" />
+                        <Pencil className="h-4 w-4" />
                       </Button>
-                    </div>
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent>
-                  <div className="space-y-4 pt-4">
-                    <h4 className="font-semibold">Players</h4>
-                    {team.players.length === 0 ? (
-                      <p className="text-sm text-muted-foreground">No players in this team</p>
-                    ) : (
-                      <div className="space-y-2 flex grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {team.players.map((player) => (
-                          <div key={player._id} className="flex items-center justify-between p-3 border rounded-lg">
-                            <div className="space-y-1">
-                              <p className="font-medium">{player.name}</p>
-                              <p className="text-sm text-muted-foreground">UID: {player.uid}</p>
-                              <p className="text-sm text-muted-foreground">{player.email}</p>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Dialog>
-                                <DialogTrigger asChild>
-                                  <Button variant="ghost" size="sm" onClick={() => setEditingPlayer(player)}>
-                                    <Pencil className="h-4 w-4" />
-                                  </Button>
-                                </DialogTrigger>
-                                <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-                                  <DialogHeader>
-                                    <DialogTitle>Edit Player</DialogTitle>
-                                    <DialogDescription>Update player information</DialogDescription>
-                                  </DialogHeader>
-                                  <PlayerEditForm
-                                    player={editingPlayer || player}
-                                    onSave={(updates) => handleUpdatePlayer(player._id, updates)}
-                                    onCancel={() => setEditingPlayer(null)}
-                                  />
-                                </DialogContent>
-                              </Dialog>
-                              <Button variant="ghost" size="sm" onClick={() => handleDeletePlayer(player._id)}>
-                                <Trash2 className="h-4 w-4 text-destructive" />
-                              </Button>
-                            </div>
+                    </DialogTrigger>
+                    <DialogContent onClick={(e) => e.stopPropagation()}>
+                      <DialogHeader>
+                        <DialogTitle>Edit Team</DialogTitle>
+                        <DialogDescription>Update team information</DialogDescription>
+                      </DialogHeader>
+                      <TeamEditForm
+                        team={editingTeam || team}
+                        onSave={(updates) => handleUpdateTeam(team._id, updates)}
+                        onCancel={() => setEditingTeam(null)}
+                      />
+                    </DialogContent>
+                  </Dialog>
+
+                  {/* Delete Button */}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleDeleteTeam(team._id)
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4 text-destructive" />
+                  </Button>
+                </div>
+              </div>
+              {/* Accordion content stays same */}
+              <AccordionContent>
+                <div className="space-y-4 pt-4">
+                  <h4 className="font-semibold">Players</h4>
+                  {team.players.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">No players in this team</p>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {team.players.map((player) => (
+                        <div key={player._id} className="flex items-center justify-between p-3 border rounded-lg">
+                          <div className="space-y-1">
+                            <p className="font-medium">{player.name}</p>
+                            <p className="text-sm text-muted-foreground">UID: {player.uid}</p>
+                            <p className="text-sm text-muted-foreground">{player.email}</p>
                           </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            ))}
+                          <div className="flex items-center gap-2">
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button variant="ghost" size="sm" onClick={() => setEditingPlayer(player)}>
+                                  <Pencil className="h-4 w-4" />
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                                <DialogHeader>
+                                  <DialogTitle>Edit Player</DialogTitle>
+                                  <DialogDescription>Update player information</DialogDescription>
+                                </DialogHeader>
+                                <PlayerEditForm
+                                  player={editingPlayer || player}
+                                  onSave={(updates) => handleUpdatePlayer(player._id, updates)}
+                                  onCancel={() => setEditingPlayer(null)}
+                                />
+                              </DialogContent>
+                            </Dialog>
+                            <Button variant="ghost" size="sm" onClick={() => handleDeletePlayer(player._id)}>
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          ))}
           </Accordion>
         )}
       </CardContent>

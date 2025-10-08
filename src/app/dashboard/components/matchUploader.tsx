@@ -4,10 +4,10 @@ import type React from "react"
 
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Upload, Check, Download, Copy } from "lucide-react"
+import { Upload, Check, Download, Copy, FileJson, Badge, CheckCircle2, Loader2 } from "lucide-react"
 import { checkPlayerData, getMatchData, updateGameData } from "@/server/game/match"
 import { MatchDataDialog } from "./resultView/match-data-dialogue"
 import { toast } from "sonner"
@@ -229,122 +229,244 @@ export default function MatchDataUploader() {
   const showMatchUpload = matchNo && matchData && isMatchEnded && !isMatchDataUploaded
 
   return (
-    <Card className="w-full max-w-4xl mx-auto">
-      <CardHeader>
-        <CardTitle>Match Data Uploader</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <MatchDataSelector handleMatchChange={handleMatchChange} setEvent={setEvent} event={event} />
+<div className="space-y-6">
+  {/* Match Data Uploader */}
+  <Card className="w-full max-w-4xl mx-auto border-2 hover:border-primary/50 transition-colors">
+    <CardHeader>
+      <CardTitle>Match Data Uploader</CardTitle>
+    </CardHeader>
+    <CardContent>
+      <MatchDataSelector
+        handleMatchChange={handleMatchChange}
+        setEvent={setEvent}
+        event={event}
+      />
+    </CardContent>
+  </Card>
 
-        {showUploadSection && (
-          <div className="space-y-4">
-            <Label>Match Data</Label>
-
-            <div className="space-y-4 p-4 border rounded-lg">
-              <h3 className="font-medium">Upload from File</h3>
-              <div className="flex items-center space-x-4">
-                <Input
-                  type="file"
-                  accept=".json,.txt"
-                  onChange={handleMatchDataUpload}
-                  id="file-upload"
-                  className="hidden"
-                />
-                <Label
-                  htmlFor="file-upload"
-                  className="cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
-                >
-                  <Upload className="mr-2 h-4 w-4" />
-                  Choose file
-                </Label>
-                <span className="text-sm text-muted-foreground">
-                  {matchData ? `${matchData.allinfo.TotalPlayerList.length} players loaded` : "No file chosen"}
-                </span>
-              </div>
-            </div>
-
-            <div className="space-y-4 p-4 border rounded-lg">
-              <h3 className="font-medium">Fetch from API</h3>
-                <Button onClick={fetchMatchDataFromAPI} disabled={fetching}>
-                <Download className="mr-2 h-4 w-4" />
-                {fetching ? "Fetching..." : "Fetch Match Data"}
-                </Button>
-              </div>
-
-              { matchData ? null : (<div className="space-y-4 p-4 border rounded-lg">
-                <h3 className="font-medium">Send Match Data to API</h3>
-                <div className="flex items-center gap-2">
-                <Button variant="outline" disabled>
-                  <Upload className="mr-2 h-4 w-4" />
-                  POST {`/api/matchdata/${event || "<event>"}`}
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={async () => {
-                  try {
-                    await navigator.clipboard.writeText(`${window.location.origin}/api/matchdata/${event}`)
-                    toast.success("API link copied!")
-                  } catch {
-                    toast.error("Failed to copy link")
-                  }
-                  }}
-                  disabled={!event}
-                >
-                  <Copy className="mr-2 h-4 w-4" />
-                  Copy API Link
-                </Button>
-                </div>
-                <div className="text-xs text-muted-foreground break-all">
-                {event ? `${window.location.origin}/api/matchdata/${event}` : "No event selected"}
-                </div>
-              </div>)}
-
-            {matchData && (
-              <div className="space-y-4 p-4 border rounded-lg bg-muted/50">
-                <h3 className="font-medium">Actions</h3>
-                <div className="flex flex-wrap gap-2">
-                  <Button onClick={checkMatchData} disabled={checking}>
-                    <Check className="mr-2 h-4 w-4" />
-                    {checking ? "Checking..." : "Validate Players"}
-                  </Button>
-
-                  <Button onClick={copyTotalPlayerList} disabled={copied} variant="outline">
-                    <Copy className="mr-2 h-4 w-4" />
-                    {copied ? "Copied!" : "Copy Data"}
-                  </Button>
-
-                  {showMatchUpload && (
-                    <Button onClick={uploadMatchData} disabled={uploading}>
-                      <Upload className="mr-2 h-4 w-4" />
-                      {uploading ? "Uploading..." : "Upload Match Data"}
-                    </Button>
-                  )}
-                </div>
-              </div>
-            )}
+  {/* Upload Section */}
+  {showUploadSection && (
+    <div className="space-y-4 w-full max-w-4xl mx-auto">
+      <Card className="border-2 hover:border-primary/50 transition-colors">
+        <CardHeader className="pb-3">
+          <div className="flex items-center gap-2">
+            <FileJson className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-base">Data Source</CardTitle>
           </div>
-        )}
+          <CardDescription className="text-xs">
+            Choose how to load match data
+          </CardDescription>
+        </CardHeader>
 
-        {isMatchDataUploaded && resultData && (
-          <>
-            <MatchDataDialog data={resultData} loading={uploading} />
-            <div className="mt-4 p-4 bg-green-100 text-green-800 rounded-md flex items-center">
-              <Check className="mr-2 h-5 w-5" />
-              <span>Match data successfully uploaded!</span>
+        <CardContent className="space-y-4">
+          {/* File Upload */}
+          <div className="space-y-3 rounded-lg border border-border/50 bg-muted/30 p-4">
+            <div className="flex items-center justify-between">
+              <Label className="text-sm font-medium">Upload from File</Label>
+              {matchData && (
+                <Badge className="status-badge">
+                  <CheckCircle2 className="h-3 w-3" />
+                  {matchData.allinfo.TotalPlayerList.length} players
+                </Badge>
+              )}
             </div>
-          </>
-        )}
 
-        <CheckPlayerDataDialog
-          isOpen={showPlayerDialog}
-          onOpenChange={setShowPlayerDialog}
-          matchData={matchData}
-          unMatchedGameData={unMatchedGameData}
-          unMatchedDbData={unMatchedDbData}
-          onUpdatePlayerData={setMatchData}
-          checking={!isMatchEnded}
-        />
-      </CardContent>
-    </Card>
-  )
+            <div className="flex items-center gap-3">
+              <Input
+                type="file"
+                accept=".json,.txt"
+                onChange={handleMatchDataUpload}
+                id="file-upload"
+                className="hidden"
+              />
+              <Label
+                htmlFor="file-upload"
+                className="cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 transition-all duration-200 hover:scale-105 active:scale-95"
+              >
+                <Upload className="mr-2 h-4 w-4" />
+                Choose JSON File
+              </Label>
+              <span className="text-xs text-muted-foreground">
+                {matchData ? "File loaded successfully" : "No file selected"}
+              </span>
+            </div>
+          </div>
+
+          <div className="section-divider" />
+
+          {/* API Fetch */}
+          <div className="space-y-3 rounded-lg border border-border/50 bg-muted/30 p-4">
+            <Label className="text-sm font-medium">Fetch from API</Label>
+            <Button
+              onClick={fetchMatchDataFromAPI}
+              disabled={fetching}
+              className="w-full sm:w-auto transition-all duration-200 hover:scale-105 active:scale-95"
+              variant="secondary"
+            >
+              {fetching ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Fetching...
+                </>
+              ) : (
+                <>
+                  <Download className="mr-2 h-4 w-4" />
+                  Fetch Match Data
+                </>
+              )}
+            </Button>
+          </div>
+
+          {/* API Info */}
+          {!matchData && (
+            <>
+              <div className="section-divider" />
+              <div className="space-y-3 rounded-lg border border-border/50 bg-muted/30 p-4">
+                <Label className="text-sm font-medium">API Endpoint</Label>
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <Button
+                    variant="outline"
+                    disabled
+                    className="flex-1 justify-start font-mono text-xs bg-transparent"
+                  >
+                    <Upload className="mr-2 h-3.5 w-3.5" />
+                    POST /api/matchdata/{event || "<event>"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={async () => {
+                      try {
+                        await navigator.clipboard.writeText(
+                          `${window.location.origin}/api/matchdata/${event}`
+                        )
+                        toast.success("API link copied!")
+                      } catch {
+                        toast.error("Failed to copy link")
+                      }
+                    }}
+                    disabled={!event}
+                    className="transition-all duration-200 hover:scale-105 active:scale-95"
+                  >
+                    <Copy className="mr-2 h-4 w-4" />
+                    Copy Link
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground font-mono break-all">
+                  {event
+                    ? `${window.location.origin}/api/matchdata/${event}`
+                    : "Select an event to view API endpoint"}
+                </p>
+              </div>
+            </>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Data Actions */}
+      {matchData && (
+        <Card className="border-2 hover:border-primary/50 transition-colors border-primary/20">
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 text-primary" />
+              <CardTitle className="text-base">Data Actions</CardTitle>
+            </div>
+            <CardDescription className="text-xs">
+              Validate and upload match data
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                onClick={checkMatchData}
+                disabled={checking}
+                className="transition-all duration-200 hover:scale-105 active:scale-95"
+                variant="secondary"
+              >
+                {checking ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Validating...
+                  </>
+                ) : (
+                  <>
+                    <Check className="mr-2 h-4 w-4" />
+                    Validate Players
+                  </>
+                )}
+              </Button>
+
+              <Button
+                onClick={copyTotalPlayerList}
+                disabled={copied}
+                variant="outline"
+                className="bg-transparent transition-all duration-200 hover:scale-105 active:scale-95"
+              >
+                <Copy className="mr-2 h-4 w-4" />
+                {copied ? "Copied!" : "Copy Data"}
+              </Button>
+
+              {showMatchUpload && (
+                <Button
+                  onClick={uploadMatchData}
+                  disabled={uploading}
+                  className="transition-all duration-200 hover:scale-105 active:scale-95"
+                >
+                  {uploading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Uploading...
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="mr-2 h-4 w-4" />
+                      Upload Match Data
+                    </>
+                  )}
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  )}
+
+  {/* Success State */}
+  {isMatchDataUploaded && resultData && (
+    <div className="space-y-4 w-full max-w-4xl mx-auto">
+      <Card className="border-2 hover:border-primary/50 transition-colors border-green-500/20 bg-green-500/5">
+        <CardContent>
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-500/10 border border-green-500/20">
+              <CheckCircle2 className="h-5 w-5 text-green-500" />
+            </div>
+            <div>
+              <p className="font-medium text-green-500">
+                Match data uploaded successfully
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Data is now available in the system
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <MatchDataDialog data={resultData} loading={uploading} />
+    </div>
+  )}
+
+  {/* Player Data Dialog */}
+  <CheckPlayerDataDialog
+    isOpen={showPlayerDialog}
+    onOpenChange={setShowPlayerDialog}
+    matchData={matchData}
+    unMatchedGameData={unMatchedGameData}
+    unMatchedDbData={unMatchedDbData}
+    onUpdatePlayerData={setMatchData}
+    checking={!isMatchEnded}
+  />
+</div>
+
+    )
 }

@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import EventsManagement from "./EventsManagement"
+import EventsManagement, { EventsData } from "./EventsManagement"
 import MatchesManagement from "./MatchesManagement"
 import DiscordManagement from "./DiscordManagement"
 import UserProfile from "./UserProfile"
@@ -14,20 +14,6 @@ type User = {
   name?: string | null
   email?: string | null
   superUser?: boolean
-}
-
-type EventsData = {
-  events: {
-    id: string
-    name: string
-    organizer?: string
-    discordLink?: string
-    stages: {
-      id: string
-      name: string
-      groups: { id: string; name: string }[]
-    }[]
-  }[]
 }
 
 type UsersData = any[]
@@ -46,12 +32,15 @@ export default function SettingsManager({
   initialUsers,
   isSuperUser,
   currentUser,
+  availablePointSystems
 }: {
-  initialEvents: EventsData
+  initialEvents: EventsData[]
   initialUsers: UsersData
   isSuperUser: boolean
   currentUser: User
+  availablePointSystems: { id: string; name: string }[]
 }) {
+
   const [selection, setSelection] = useState<Selection>({
     eventId: "",
     stageId: "",
@@ -80,7 +69,7 @@ export default function SettingsManager({
 
       {/* Events Tab */}
       <TabsContent value="events" className="mt-6">
-        <EventsManagement initialData={initialEvents} />
+        <EventsManagement initialData={initialEvents} availablePointSystems={availablePointSystems} />
       </TabsContent>
 
       {/* Users Tab (SuperUser only) */}
@@ -134,6 +123,7 @@ export default function SettingsManager({
           <DiscordManagement
             eventName={selection.eventName}
             stageName={selection.stageName}
+            stageId={selection.stageId}
           />
         )}
       </TabsContent>

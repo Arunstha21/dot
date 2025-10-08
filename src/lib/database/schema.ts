@@ -6,7 +6,7 @@ export interface ITeam extends Document {
   _id: Types.ObjectId;
   // Basic info
   name: string
-  tag?: string
+  tag: string
   email?: string
 
   // Tournament context
@@ -17,6 +17,7 @@ export interface ITeam extends Document {
 
   // Members
   players: Types.ObjectId[]
+  discordUsers: Types.ObjectId[]
 
   createdAt: Date
   updatedAt: Date
@@ -33,6 +34,9 @@ export interface IRoleManagerUser extends Document {
     otp?: number
     sender?: string
     player: Types.ObjectId
+    team: Types.ObjectId
+    createdAt: Date
+    updatedAt: Date
 }
 
 export interface IPlayer extends Document {
@@ -63,6 +67,7 @@ export interface IEvent extends Document {
   name: string
   organizer?: string
   isPublic: boolean
+  discordLink?: string
 
   // Structure
   stages: Types.ObjectId[]
@@ -232,13 +237,14 @@ export interface ITeamStats extends Document {
 const teamSchema = new Schema<ITeam>(
   {
     name: { type: String, required: true },
-    tag: { type: String },
+    tag: { type: String, required: true },
     email: { type: String },
     event: { type: Schema.Types.ObjectId, ref: "Event" },
     stage: { type: Schema.Types.ObjectId, ref: "Stage" },
     group: { type: Schema.Types.ObjectId, ref: "Group" },
     slot: { type: Number },
     players: [{ type: Schema.Types.ObjectId, ref: "Player" }],
+    discordUsers: [{ type: Schema.Types.ObjectId, ref: "RoleManagerUser" }]
   },
   { timestamps: true },
 )
@@ -249,6 +255,7 @@ const roleManagerUserSchema = new Schema<IRoleManagerUser>(
     email: { type: String, required: true },
     role: [{ type: String, required: true }],
     guild: { type: Schema.Types.ObjectId, ref: "Guild", required: true },
+    team: { type: Schema.Types.ObjectId, ref: "Team" },
     serverJoined: { type: Boolean, default: false },
     emailSent: { type: Number, default: 0 },
     otp: { type: String },
@@ -278,6 +285,7 @@ const eventSchema = new Schema<IEvent>(
     name: { type: String, required: true },
     organizer: { type: String },
     isPublic: { type: Boolean, default: false },
+    discordLink: { type: String },
     stages: [{ type: Schema.Types.ObjectId, ref: "Stage" }],
     pointSystem: { type: Schema.Types.ObjectId, ref: "PointSystem" },
   },

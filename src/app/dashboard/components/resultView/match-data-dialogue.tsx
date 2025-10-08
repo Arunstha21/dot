@@ -26,20 +26,30 @@ export function MatchDataDialog({ data, loading }: MatchDataDialogProps) {
       <DialogTrigger asChild>
         <Button variant="outline">Read Match Data</Button>
       </DialogTrigger>
-      <DialogContent className="overflow-y-auto overflow-x-auto">
+
+      <DialogContent className="max-w-90vh] max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Match Data</DialogTitle>
         </DialogHeader>
-        <Tabs defaultValue="team-results" className="w-full">
+
+        <Tabs defaultValue="team-results" className="w-full mt-4">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="team-results">Team Results</TabsTrigger>
             <TabsTrigger value="player-results">Player Results</TabsTrigger>
           </TabsList>
-          <TabsContent value="team-results">
-            <TournamentResults data={{ teamResults: data.teamResults, playerResults: [] }} isLoading={loading}/>
+
+          <TabsContent value="team-results" className="overflow-x-auto">
+            <TournamentResults
+              data={{ teamResults: data.teamResults, playerResults: [] }}
+              isLoading={loading}
+            />
           </TabsContent>
-          <TabsContent value="player-results">
-            <TournamentResults data={{ teamResults: [], playerResults: data.playerResults }} isLoading={loading}/>
+
+          <TabsContent value="player-results" className="overflow-x-auto">
+            <TournamentResults
+              data={{ teamResults: [], playerResults: data.playerResults }}
+              isLoading={loading}
+            />
           </TabsContent>
         </Tabs>
       </DialogContent>

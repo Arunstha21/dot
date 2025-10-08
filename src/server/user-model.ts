@@ -11,11 +11,15 @@ export async function getUserByUserNameOrEmail(userNameOrEmail: string) {
 
 export async function listUsers() {
   await dbConnect()
-  const users = await User.find().sort({ createdAt: -1 }).lean()
+  const users = await User.find().sort({ createdAt: -1 }) as IUser[]
 
   return users.map((u) => ({
-    ...u,
     _id: (u._id as string | { toString(): string }).toString(),
+    userName: u.userName,
+    email: u.email,
+    superUser: u.superUser,
+    guilds: u.guilds?.map((g) => (typeof g === "string" ? g : (g as { toString(): string }).toString())) || [],
+    events: u.events?.map((e) => (typeof e === "string" ? e : (e as { toString(): string }).toString())) || [],
     createdAt: u.createdAt?.toISOString(),
     updatedAt: u.updatedAt?.toISOString(),
   }))

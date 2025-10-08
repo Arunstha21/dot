@@ -1,5 +1,5 @@
 import { logger } from "../../logger";
-import credentials from "../../credentials.json";
+import credentials from "../../../../credentials.json";
 
 let access_token: string = '';
 let expiry: Date = new Date(Date.now() - 120 * 1000);

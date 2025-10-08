@@ -1,16 +1,633 @@
 "use server"
 
-import { z } from "zod"
-import { getServerSession } from "next-auth"
-import { authConfig } from "@/server/auth"
+import { Guild, IGuild } from "@/lib/database/guild"
+import { IMatchLog, IMatchLogger, MatchLog, MatchLogger } from "@/lib/database/matchLog"
+import { IRoleManagerUser, IStage, RoleManagerUser, Stage } from "@/lib/database/schema"
+import { ITicketConfig, ITicketDocument, TicketConfig, TicketDocument } from "@/lib/database/ticket"
 import { dbConnect } from "@/lib/db"
 import { revalidatePath } from "next/cache"
+import { getStageWithGuild, linkGuildToStage } from "../DiscordResultStage"
 import { checkBotInServer, getDiscordChannels } from "@/discord/results/send"
-import { getStageWithGuild, linkGuildToStage, updateGuildResultChannel } from "../DiscordResultStage"
-import { Guild, IGuild } from "@/lib/database/guild"
-import { Stage } from "@/lib/database/schema"
-import { TicketConfig } from "@/lib/database/ticket"
-import { MatchLogger } from "@/lib/database/matchLog"
+
+// Mock data structure - replace with your actual database calls
+export interface GuildData {
+  _id: string
+  guildId: string
+  guildName: string
+  ticketConfig?: {
+    _id: string
+    status: "active" | "inactive"
+    ticketChannel: string
+    transcriptChannel: string
+    ticketCount: number
+  }
+  matchLogger?: {
+    _id: string
+    active: boolean
+    loggerChannelId: string
+  }
+  resultChannel?: string
+  roleManager?: boolean
+  users?: any[]
+  admins?: any[]
+}
+
+interface ActionResult {
+  status: "success" | "error"
+  message: string
+}
+
+export async function getAllGuilds(stageId: string): Promise<GuildData> {
+  try {
+    await dbConnect()
+    const StageDoc = await Stage.findOne({ _id: stageId })
+      .populate({
+        path: "guild",
+        populate: [{
+          path: "users"
+        }, {
+          path: "admins"
+        },{
+          path: "ticketConfig"
+        },{
+          path: "matchLogger"
+        }]
+      }) as IStage & { guild: GuildData }
+
+    const guildData = {
+      _id: StageDoc.guild._id.toString(),
+      guildId: StageDoc.guild.guildId,
+      guildName: StageDoc.guild.guildName,
+      ticketConfig: StageDoc.guild.ticketConfig ? {
+        _id: (StageDoc.guild.ticketConfig as any)._id.toString(),
+        status: (StageDoc.guild.ticketConfig as any).status,
+        ticketChannel: (StageDoc.guild.ticketConfig as any).ticketChannel,
+        transcriptChannel: (StageDoc.guild.ticketConfig as any).transcriptChannel,
+        ticketCount: (StageDoc.guild.ticketConfig as any).ticketCount || 0,
+      } : undefined,
+      matchLogger: StageDoc.guild.matchLogger ? {
+        _id: (StageDoc.guild.matchLogger as any)._id.toString(),
+        active: (StageDoc.guild.matchLogger as any).active,
+        loggerChannelId: (StageDoc.guild.matchLogger as any).loggerChannelId,
+      } : undefined,
+      resultChannel: StageDoc.guild.resultChannel,
+      roleManager: StageDoc.guild.roleManager,
+      users: StageDoc.guild.users || [],
+      admins: StageDoc.guild.admins || [],
+    }
+
+    return guildData as GuildData
+  } catch (error) {
+    console.error("Error fetching guilds:", error)
+    throw new Error("Failed to fetch guilds")
+  }
+}
+
+export async function toggleTicketConfigAction(prevState: ActionResult, formData: FormData): Promise<ActionResult> {
+  try {
+    const ticketConfigId = formData.get("ticketConfigId") as string
+    const active = formData.get("active") === "true"
+
+    if (!ticketConfigId) {
+      return {
+        status: "error",
+        message: "Ticket config ID is required",
+      }
+    }
+
+    await dbConnect()
+    await TicketConfig.findByIdAndUpdate(ticketConfigId, {
+      status: active ? "active" : "inactive",
+    })
+
+    revalidatePath("/dashboard")
+
+    return {
+      status: "success",
+      message: `Ticket system ${active ? "enabled" : "disabled"} successfully`,
+    }
+  } catch (error) {
+    console.error("Error toggling ticket config:", error)
+    return {
+      status: "error",
+      message: "Failed to toggle ticket system",
+    }
+  }
+}
+
+export async function toggleMatchLoggerAction(prevState: ActionResult, formData: FormData): Promise<ActionResult> {
+  try {
+    const matchLoggerId = formData.get("matchLoggerId") as string
+    const active = formData.get("active") === "true"
+
+    if (!matchLoggerId) {
+      return {
+        status: "error",
+        message: "Match logger ID is required",
+      }
+    }
+
+    await dbConnect()
+    await MatchLogger.findByIdAndUpdate(matchLoggerId, {
+      active: active,
+    })
+
+    revalidatePath("/dashboard")
+
+    return {
+      status: "success",
+      message: `Match logger ${active ? "enabled" : "disabled"} successfully`,
+    }
+  } catch (error) {
+    console.error("Error toggling match logger:", error)
+    return {
+      status: "error",
+      message: "Failed to toggle match logger",
+    }
+  }
+}
+
+export async function toggleRoleManagerAction(guildId: string, enabled: boolean): Promise<ActionResult> {
+  try {
+    if (!guildId) {
+      return {
+        status: "error",
+        message: "Guild ID is required",
+      }
+    }
+
+    await dbConnect()
+    await Guild.findByIdAndUpdate(guildId, {
+      roleManager: enabled,
+    })
+
+    revalidatePath("/dashboard")
+
+    return {
+      status: "success",
+      message: `Role Manager ${enabled ? "enabled" : "disabled"} successfully`,
+    }
+  } catch (error) {
+    console.error("Error toggling role manager:", error)
+    return {
+      status: "error",
+      message: "Failed to toggle Role Manager",
+    }
+  }
+}
+
+// CRUD operations for Role Manager users
+
+export async function getRoleManagerUsers(guildId: string): Promise<{ success: boolean; users: IRoleManagerUser[] }> {
+  try {
+    await dbConnect()
+    const users = await RoleManagerUser.find({ guild: guildId }).populate("team").populate("player")
+
+    return {
+      success: true,
+      users: users as IRoleManagerUser[],
+    }
+  } catch (error) {
+    console.error("Error fetching role manager users:", error)
+    return {
+      success: false,
+      users: [],
+    }
+  }
+}
+
+export async function createRoleManagerUser(data: {
+  userName: string
+  email: string
+  role: string[]
+  guild: string
+  serverJoined: boolean
+  emailSent: boolean
+}): Promise<ActionResult> {
+  try {
+    if (!data.userName || !data.email || !data.guild) {
+      return {
+        status: "error",
+        message: "Username, email, and guild ID are required",
+      }
+    }
+
+    await dbConnect()
+    await RoleManagerUser.create({
+      userName: data.userName,
+      email: data.email,
+      role: data.role,
+      guild: data.guild,
+      serverJoined: data.serverJoined,
+      emailSent: data.emailSent ? 1 : 0,
+      sender: "admin", // Default sender
+      player: null, // Will be set when player is created
+    })
+
+    revalidatePath("/dashboard")
+
+    return {
+      status: "success",
+      message: "User created successfully",
+    }
+  } catch (error) {
+    console.error("Error creating user:", error)
+    return {
+      status: "error",
+      message: "Failed to create user",
+    }
+  }
+}
+
+export async function updateRoleManagerUser(
+  userId: string,
+  data: {
+    userName: string
+    email: string
+    role: string[]
+    serverJoined: boolean
+    emailSent: boolean
+  },
+): Promise<ActionResult> {
+  try {
+    if (!userId) {
+      return {
+        status: "error",
+        message: "User ID is required",
+      }
+    }
+
+    await dbConnect()
+    await RoleManagerUser.findByIdAndUpdate(userId, {
+      userName: data.userName,
+      email: data.email,
+      role: data.role,
+      serverJoined: data.serverJoined,
+      emailSent: data.emailSent ? 1 : 0,
+    })
+
+    revalidatePath("/dashboard")
+
+    return {
+      status: "success",
+      message: "User updated successfully",
+    }
+  } catch (error) {
+    console.error("Error updating user:", error)
+    return {
+      status: "error",
+      message: "Failed to update user",
+    }
+  }
+}
+
+export async function deleteRoleManagerUser(userId: string): Promise<ActionResult> {
+  try {
+    if (!userId) {
+      return {
+        status: "error",
+        message: "User ID is required",
+      }
+    }
+
+    await dbConnect()
+    await RoleManagerUser.findByIdAndDelete(userId)
+
+    revalidatePath("/dashboard")
+
+    return {
+      status: "success",
+      message: "User deleted successfully",
+    }
+  } catch (error) {
+    console.error("Error deleting user:", error)
+    return {
+      status: "error",
+      message: "Failed to delete user",
+    }
+  }
+}
+
+// Server actions for Discord Results Setup
+
+export async function fetchDiscordChannels(guildId: string) {
+  try {
+    const channels = await getDiscordChannels(guildId)
+    return {
+      success: true,
+      channels,
+    }
+  } catch (error) {
+    console.error("Error fetching Discord channels:", error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+      channels: [],
+    }
+  }
+}
+
+export async function getDiscordClientId() {
+  try {
+    return process.env.DISCORD_CLIENT_ID || ""
+  } catch (error) {
+    console.error("Error getting Discord client ID:", error)
+    return ""
+  }
+}
+
+export async function selectDiscordChannel(guildId: string, channelId: string) {
+  try {
+    await dbConnect()
+    await Guild.findOneAndUpdate({ guildId: guildId }, { resultChannel: channelId })
+
+    revalidatePath("/dashboard")
+
+    return {
+      success: true,
+    }
+  } catch (error) {
+    console.error("Error selecting Discord channel:", error)
+    return {
+      success: false,
+      error: "Failed to select channel",
+    }
+  }
+}
+
+export async function setupGuildForStage(stageId: string, guildId: string, guildName: string) {
+  try {
+    // Check if guild already exists in database
+    let guild = await Guild.findOne({ guildId }).lean().exec() as IGuild | null
+
+    // If guild doesn't exist, create it
+    if (!guild) {
+      const stage = await Stage.findById(stageId).exec()
+      if (!stage) {
+        return {
+          success: false,
+          error: "Stage not found",
+        }
+      }
+      const newGuild = new Guild({
+        guildId,
+        guildName,
+        users: [],
+        admins: [],
+        events: [stage.event],
+        roleManager: false,
+      })
+      guild = (await newGuild.save()).toObject()
+    }
+    if (!guild?._id) {
+      throw new Error("Guild ID not found after creation")
+    }
+
+    // Link guild to stage
+    const result = await linkGuildToStage(stageId, guild._id.toString())
+
+    if (!result.success) {
+      return {
+        success: false,
+        error: result.error || "Failed to link guild to stage",
+      }
+    }
+
+    return {
+      success: true,
+      guild: JSON.parse(JSON.stringify(guild)),
+    }
+  } catch (error) {
+    console.error("Error setting up guild:", error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    }
+  }
+}
+
+// Server actions for Ticket System
+export async function getTicketConfig(guildId: string) {
+  try {
+    await dbConnect()
+    const guild = await Guild.findOne({ guildId: guildId }).populate("ticketConfig")
+    const config = guild?.ticketConfig as ITicketConfig | null
+
+    return {
+      success: true,
+      config: config,
+    }
+  } catch (error) {
+    console.error("Error fetching ticket config:", error)
+    return {
+      success: false,
+      config: null,
+    }
+  }
+}
+
+export async function setupTicketConfig(
+  guildId: string,
+  ticketChannelId: string,
+  transcriptChannelId: string,
+  categories: string[],
+) {
+  try {
+    await dbConnect()
+    const guild = await Guild.findOne({ guildId: guildId })
+
+    if (!guild) {
+      return {
+        success: false,
+        error: "Guild not found",
+        config: null,
+      }
+    }
+
+    const config = await TicketConfig.findOneAndUpdate(
+      { guild: guild._id },
+      {
+        guild: guild._id,
+        ticketChannel: ticketChannelId,
+        transcriptChannel: transcriptChannelId,
+        ticketCategories: categories,
+        status: "active",
+      },
+      { upsert: true, new: true },
+    )
+
+    // Update guild with ticket config reference
+    await Guild.findByIdAndUpdate(guild._id, { ticketConfig: config._id })
+
+    revalidatePath("/dashboard")
+
+    return {
+      success: true,
+      config: config,
+    }
+  } catch (error) {
+    console.error("Error setting up ticket config:", error)
+    return {
+      success: false,
+      error: "Failed to setup ticket config",
+      config: null,
+    }
+  }
+}
+
+export async function toggleTicketStatus(configId: string, active: boolean) {
+  try {
+    await dbConnect()
+    await TicketConfig.findByIdAndUpdate(configId, { status: active ? "active" : "inactive" })
+
+    revalidatePath("/dashboard")
+
+    return {
+      success: true,
+    }
+  } catch (error) {
+    console.error("Error toggling ticket status:", error)
+    return {
+      success: false,
+      error: "Failed to toggle status",
+    }
+  }
+}
+
+export async function getTicketDocuments(guildId: string) {
+  try {
+    await dbConnect()
+    const guild = await Guild.findOne({ guildId: guildId })
+
+    if (!guild) {
+      return {
+        success: false,
+        tickets: [],
+      }
+    }
+
+    const tickets = await TicketDocument.find({ guild: guild._id }).sort({ createdAt: -1 }).limit(50)
+
+    return {
+      success: true,
+      tickets: tickets as ITicketDocument[],
+    }
+  } catch (error) {
+    console.error("Error fetching ticket documents:", error)
+    return {
+      success: false,
+      tickets: [],
+    }
+  }
+}
+
+// Server actions for Match Logger
+export async function getMatchLogger(guildId: string) {
+  try {
+    await dbConnect()
+    const guild = await Guild.findOne({ guildId: guildId }).populate("matchLogger")
+    const logger = guild?.matchLogger as IMatchLogger | null
+
+    return {
+      success: true,
+      logger: logger,
+    }
+  } catch (error) {
+    console.error("Error fetching match logger:", error)
+    return {
+      success: false,
+      logger: null,
+    }
+  }
+}
+
+export async function setupMatchLogger(guildId: string, loggerChannelId: string) {
+  try {
+    await dbConnect()
+    const guild = await Guild.findOne({ guildId: guildId })
+
+    if (!guild) {
+      return {
+        success: false,
+        error: "Guild not found",
+        logger: null,
+      }
+    }
+
+    const logger = await MatchLogger.findOneAndUpdate(
+      { guild: guild._id },
+      {
+        guild: guild._id,
+        loggerChannelId: loggerChannelId,
+        active: true,
+      },
+      { upsert: true, new: true },
+    )
+
+    // Update guild with match logger reference
+    await Guild.findByIdAndUpdate(guild._id, { matchLogger: logger._id })
+
+    revalidatePath("/dashboard")
+
+    return {
+      success: true,
+      logger: logger,
+    }
+  } catch (error) {
+    console.error("Error setting up match logger:", error)
+    return {
+      success: false,
+      error: "Failed to setup match logger",
+      logger: null,
+    }
+  }
+}
+
+export async function toggleMatchLoggerStatus(loggerId: string, active: boolean) {
+  try {
+    await dbConnect()
+    await MatchLogger.findByIdAndUpdate(loggerId, { active })
+
+    revalidatePath("/dashboard")
+
+    return {
+      success: true,
+    }
+  } catch (error) {
+    console.error("Error toggling match logger status:", error)
+    return {
+      success: false,
+      error: "Failed to toggle status",
+    }
+  }
+}
+
+export async function getMatchLogs(guildId: string) {
+  try {
+    await dbConnect()
+    const guild = await Guild.findOne({ guildId: guildId }).populate("matchLogger")
+
+    if (!guild || !guild.matchLogger) {
+      return {
+        success: false,
+        logs: [],
+      }
+    }
+
+    const logs = await MatchLog.find({ logger: guild.matchLogger }).sort({ time: -1 }).limit(200)
+
+    return {
+      success: true,
+      logs: logs as IMatchLog[],
+    }
+  } catch (error) {
+    console.error("Error fetching match logs:", error)
+    return {
+      success: false,
+      logs: [],
+    }
+  }
+}
 
 export async function checkDiscordSetup(stageId: string) {
   try {
@@ -67,207 +684,11 @@ export async function checkDiscordSetup(stageId: string) {
   }
 }
 
-export async function selectDiscordChannel(guildId: string, channelId: string) {
+export async function getDiscordToken() {
   try {
-    const result = await updateGuildResultChannel(guildId, channelId)
-
-    if (!result.success) {
-      return {
-        success: false,
-        error: result.error || "Failed to update channel",
-      }
-    }
-
-    return {
-      success: true,
-    }
+    return process.env.DISCORD_TOKEN || "" 
   } catch (error) {
-    console.error("Error selecting Discord channel:", error)
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
-    }
+    console.error("Error getting Discord token:", error)
+    return ""
   }
-}
-
-export async function fetchDiscordChannels(guildId: string) {
-  try {
-    const channels = await getDiscordChannels(guildId)
-    return {
-      success: true,
-      channels,
-    }
-  } catch (error) {
-    console.error("Error fetching Discord channels:", error)
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
-      channels: [],
-    }
-  }
-}
-
-export async function setupGuildForStage(stageId: string, guildId: string, guildName: string) {
-  try {
-    // Check if guild already exists in database
-    let guild = await Guild.findOne({ guildId }).lean().exec() as IGuild | null
-
-    // If guild doesn't exist, create it
-    if (!guild) {
-      const stage = await Stage.findById(stageId).exec()
-      if (!stage) {
-        return {
-          success: false,
-          error: "Stage not found",
-        }
-      }
-      const newGuild = new Guild({
-        guildId,
-        guildName,
-        users: [],
-        admins: [],
-        events: [stage.eventId],
-        roleManager: false,
-      })
-      guild = (await newGuild.save()).toObject()
-    }
-    if (!guild?._id) {
-      throw new Error("Guild ID not found after creation")
-    }
-
-    // Link guild to stage
-    const result = await linkGuildToStage(stageId, guild._id.toString())
-
-    if (!result.success) {
-      return {
-        success: false,
-        error: result.error || "Failed to link guild to stage",
-      }
-    }
-
-    return {
-      success: true,
-      guild: JSON.parse(JSON.stringify(guild)),
-    }
-  } catch (error) {
-    console.error("Error setting up guild:", error)
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
-    }
-  }
-}
-
-export async function fetchUserGuilds() {
-  try {
-    // TODO: Implement Discord OAuth to get user's guilds
-    // For now, return empty array - this would require Discord OAuth integration
-    // The user will need to manually enter guild ID and name
-    return {
-      success: true,
-      guilds: [],
-    }
-  } catch (error) {
-    console.error("Error fetching user guilds:", error)
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
-      guilds: [],
-    }
-  }
-}
-
-export async function getDiscordClientId(){
-    return process.env.DISCORD_CLIENT_ID || "";
-}
-
-export async function getDiscordToken(){
-    return process.env.DISCORD_TOKEN || "";
-}
-
-export type ActionResult = { status: "success"; message?: string } | { status: "error"; message: string }
-
-async function ensureAdmin(): Promise<ActionResult | null> {
-  const session = await getServerSession(authConfig)
-  if (!session?.user?.superUser) return { status: "error", message: "Forbidden" }
-  await dbConnect()
-  return null
-}
-
-export async function updateStageDiscordAction(_: ActionResult, formData: FormData): Promise<ActionResult> {
-  const guard = await ensureAdmin()
-  if (guard) return guard
-
-  const schema = z.object({
-    stageId: z.string().min(1),
-    guildId: z.string().optional(),
-    resultChannel: z.string().optional(),
-  })
-
-  const parsed = schema.safeParse({
-    stageId: formData.get("stageId"),
-    guildId: formData.get("guildId"),
-    resultChannel: formData.get("resultChannel"),
-  })
-
-  if (!parsed.success) return { status: "error", message: "Invalid fields" }
-
-  try {
-    const update: any = {}
-    if (parsed.data.guildId) update.guild = parsed.data.guildId
-    if (parsed.data.resultChannel !== undefined) {
-      // Also update the guild's result channel
-      if (parsed.data.guildId) {
-        await Guild.findByIdAndUpdate(parsed.data.guildId, { resultChannel: parsed.data.resultChannel })
-      }
-    }
-
-    await Stage.findByIdAndUpdate(parsed.data.stageId, update)
-    revalidatePath("/settings")
-    return { status: "success", message: "Discord settings updated" }
-  } catch (e: any) {
-    return { status: "error", message: e?.message || "Failed to update Discord settings" }
-  }
-}
-
-export async function toggleTicketConfigAction(_: ActionResult, formData: FormData): Promise<ActionResult> {
-  const guard = await ensureAdmin()
-  if (guard) return guard
-
-  const ticketConfigId = String(formData.get("ticketConfigId") || "")
-  const active = formData.get("active") === "true"
-
-  if (!ticketConfigId) return { status: "error", message: "Missing ticket config id" }
-
-  try {
-    await TicketConfig.findByIdAndUpdate(ticketConfigId, { status: active ? "active" : "inactive" })
-    revalidatePath("/settings")
-    return { status: "success", message: `Ticket system ${active ? "enabled" : "disabled"}` }
-  } catch (e: any) {
-    return { status: "error", message: e?.message || "Failed to toggle ticket system" }
-  }
-}
-
-export async function toggleMatchLoggerAction(_: ActionResult, formData: FormData): Promise<ActionResult> {
-  const guard = await ensureAdmin()
-  if (guard) return guard
-
-  const matchLoggerId = String(formData.get("matchLoggerId") || "")
-  const active = formData.get("active") === "true"
-
-  if (!matchLoggerId) return { status: "error", message: "Missing match logger id" }
-
-  try {
-    await MatchLogger.findByIdAndUpdate(matchLoggerId, { active })
-    revalidatePath("/settings")
-    return { status: "success", message: `Match logger ${active ? "enabled" : "disabled"}` }
-  } catch (e: any) {
-    return { status: "error", message: e?.message || "Failed to toggle match logger" }
-  }
-}
-
-export async function getAllGuilds() {
-  await dbConnect()
-  const guilds = await Guild.find().populate("ticketConfig").populate("matchLogger").lean()
-  return JSON.parse(JSON.stringify(guilds))
 }

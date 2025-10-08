@@ -37,4 +37,5 @@ const guildSchema = new Schema<IGuild>(
   { timestamps: true },
 )
 
+
 export const Guild = mongoose.models?.Guild || mongoose.model<IGuild>("Guild", guildSchema)

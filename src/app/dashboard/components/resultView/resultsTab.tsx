@@ -183,7 +183,7 @@ export default function ResultTabs() {
   
 
   return (
-    <div className="w-full max-w-[1400px] mx-auto">
+    <div className="w-full py-8 max-w-6xl mx-auto">
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
         <div className="space-y-2">
           <Label htmlFor="event">Event</Label>
@@ -234,7 +234,7 @@ export default function ResultTabs() {
           <Label htmlFor="matchNo">Match Number</Label>
           <Select value={matchNo} onValueChange={setMatchNo}>
             <SelectTrigger id="matchNo">
-              <SelectValue placeholder="Select Match Number" />
+              <SelectValue placeholder="Select Match" />
             </SelectTrigger>
             <SelectContent>
               {scheduleList.map((schedule) => (

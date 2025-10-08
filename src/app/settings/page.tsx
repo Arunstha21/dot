@@ -1,6 +1,6 @@
 import ProfileDropDown from "@/components/profileDropDown"
 import { Suspense } from "react"
-import { listAllHierarchy } from "@/server/actions/events-actions"
+import listPointSystems, { listAllHierarchy } from "@/server/actions/events-actions"
 import { getServerSession } from "next-auth"
 import { authConfig } from "@/server/auth"
 import { redirect } from "next/navigation"
@@ -14,10 +14,12 @@ export default async function SettingsPage() {
     redirect("/")
   }
 
-  const [eventsData, usersData] = await Promise.all([
+  const [eventsData, usersData, pointSystemData] = await Promise.all([
     listAllHierarchy(),
     session.user.superUser ? listUsersServer().catch(() => []) : Promise.resolve([]),
+    listPointSystems()
   ])
+
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -34,10 +36,11 @@ export default async function SettingsPage() {
 
       <Suspense fallback={<div>Loading...</div>}>
         <SettingsManager
-          initialEvents={eventsData}
+          initialEvents={eventsData.events}
           initialUsers={usersData}
           isSuperUser={!!session.user.superUser}
           currentUser={session.user}
+          availablePointSystems={pointSystemData}
         />
       </Suspense>
     </div>
