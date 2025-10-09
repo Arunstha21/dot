@@ -386,7 +386,7 @@ return (
                   <CardHeader>
                     <CardTitle className="text-2xl">Upload Data File</CardTitle>
                     <CardDescription>
-                      Upload your CSV or Excel file - we'll automatically detect the data type
+                      Upload your CSV or Excel file - we&apos;ll automatically detect the data type
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-6">

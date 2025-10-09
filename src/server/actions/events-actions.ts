@@ -247,6 +247,7 @@ export async function bulkUpdateSchedulesAction(_: ActionResult, formData: FormD
     schedules = JSON.parse(parsed.data.schedules)
     if (!Array.isArray(schedules)) throw new Error("Schedules is not an array")
   } catch (e) {
+    console.log("Error bulk updating schedules:", e)
     return { status: "error", message: "Invalid schedules format" }
   }
   try {
