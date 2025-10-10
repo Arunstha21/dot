@@ -83,8 +83,6 @@ export default function MatchDataUploader() {
       }
 
       const data = (await response.json()) as MatchData
-      console.log(data);
-      
       const wwcd = data.allinfo.TotalPlayerList.find((p) => p.rank === 1)
       if (wwcd) {
         setIsMatchEnded(true)

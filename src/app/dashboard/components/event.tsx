@@ -62,6 +62,7 @@ export default function Event() {
   const [stageList, setStageList] = useState<Stage[]>([])
   const [groupList, setGroupList] = useState<GroupAndSchedule[]>([])
   const [scheduleList, setScheduleList] = useState<Schedule[]>([])
+  const [isMultiGroup, setIsMultiGroup] = useState<boolean>(false)
 
   const previewRef = useRef<HTMLDivElement>(null)
   const [state, action, isPending] = useActionState(sendEventEmailAction, { status: "idle" as const })
@@ -99,8 +100,9 @@ export default function Event() {
     async function fetchGroupData() {
       if (!stage) return
       const groupAndScheduleData = await getGroupAndSchedule(stage)
-      const { groups } = groupAndScheduleData
+      const { groups, isMultiGroup } = groupAndScheduleData
       setGroupList(groups)
+      setIsMultiGroup(isMultiGroup)
     }
     fetchGroupData()
   }, [stage])

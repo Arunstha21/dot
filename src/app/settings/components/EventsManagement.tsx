@@ -69,8 +69,6 @@ export default function EventsManagement({
   initialData: EventsData[]
   availablePointSystems: AvailablePointSystems
 }) {
-
-  console.log(initialData);
   
   const [editEventDialogOpen, setEditEventDialogOpen] = useState(false)
   const [editStageDialogOpen, setEditStageDialogOpen] = useState(false)

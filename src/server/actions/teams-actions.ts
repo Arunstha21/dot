@@ -18,7 +18,6 @@ async function ensureAdmin(): Promise<ActionResult | null> {
 
 export async function getTeamsByGroup(groupId: string) {
   await dbConnect()
-  console.log(groupId);
   
   const teams = await Team.find({ group: groupId })
     .populate({

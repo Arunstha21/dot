@@ -59,45 +59,149 @@ export async function getEventData(): Promise<EventData[]> {
       id: e._id.toString(),
       name: e.name,
       organizer: e.organizer,
-      stages: stages.map((s) => ({ id: s._id.toString(), name: s.name })),
+      stages: stages.map((s) => ({ id: s._id.toString(), name: s.name, isMultiGroup: s.isMultiGroup })),
     })
   }
   return result
 }
 
 export async function getGroupAndSchedule(
-  stageId: string,
+  stageId: string
 ): Promise<{ groups: GroupAndSchedule[]; isMultiGroup: boolean }> {
   await dbConnect();
 
-  const groups = await Group.find({ stage: stageId }).populate("teams").exec();
-  const out: GroupAndSchedule[] = [];
-
-  for (const g of groups) {
-    const schedules = await Schedule.find({ groups: g._id })
+  try {
+    const scheduleData = await Schedule.find({ stage: stageId })
+      .populate({
+        path: "groups",
+        populate: {
+          path: "teams",
+          populate: { path: "players" },
+        },
+      })
+      .populate("stage")
       .sort({ matchNo: 1 })
       .exec();
 
-    out.push({
-      id: g._id.toString(),
-      name: g.name,
-      data: (g.teams || []).map((d: any) => ({
-        slot: d.slot,
-        team: d.team,
-        email: d.email,
-      })),
-      schedule: schedules.map((s) => ({
-        id: s._id.toString(),
-        matchNo: s.matchNo,
-        map: s.map,
-        startTime: s.startTime,
-        date: s.date,
-        match: s.match ? s.match.toString() : undefined,
-        overallMatchNo: s.overallMatchNo
-      })),
-    });
+    const teamsByGroupId: Record<string, GroupAndSchedule> = {};
+    let isMultiGroup = false;
+
+    for (const schedule of scheduleData) {
+      const groups = schedule.groups || [];
+
+      if (schedule.stage?.isMultiGroup) isMultiGroup = true;
+      if (groups.length > 1) isMultiGroup = true;
+
+      // --- Single Group Case ---
+      if (groups.length === 1) {
+        const group = groups[0];
+
+        if (!teamsByGroupId[group._id]) {
+          teamsByGroupId[group._id] = {
+            id: group._id.toString(),
+            name: group.name,
+            data: [],
+            schedule: [],
+          };
+        }
+
+        const teamMap = new Map<
+          string,
+          { id: string; slot: number; team: string; email?: string; }
+        >();
+
+        for (const team of group.teams || []) {
+          if (!teamMap.has(team.name)) {
+            teamMap.set(team.name, {
+              id: team._id.toString(),
+              slot: team.slot,
+              team: team.name,
+              email: team.email,
+            });
+          }
+        }
+
+        teamsByGroupId[group._id].data = Array.from(teamMap.values()).sort((a, b) => a.slot - b.slot);
+
+        teamsByGroupId[group._id].schedule.push({
+          id: schedule._id.toString(),
+          matchNo: schedule.stage?.isMultiGroup
+            ? schedule.overallMatchNo || schedule.matchNo
+            : schedule.matchNo,
+          map: schedule.map,
+          startTime: schedule.startTime,
+          date: schedule.date
+        });
+      }
+
+      // --- Multi-Group (Combined) Case ---
+      else if (groups.length >= 2) {
+        const combinedGroupId = groups.map((g: any) => g._id.toString()).join("_");
+        const combinedGroupName = groups.map((g: any) => g.name).join(" vs ");
+
+        if (!teamsByGroupId[combinedGroupId]) {
+          teamsByGroupId[combinedGroupId] = {
+            id: combinedGroupId,
+            name: combinedGroupName,
+            data: [],
+            schedule: [],
+          };
+        }
+
+        // detect if any team uses negative slots (dynamic)
+        const useDynamicSlot = groups.some((group: any) =>
+          (group.teams || []).some((team: any) => team.slot < 0)
+        );
+
+        const teamMap = new Map<
+          string,
+          { id: string; slotRef: number; team: string; email?: string; }
+        >();
+
+        for (const group of groups) {
+          for (const team of group.teams || []) {
+            if (!teamMap.has(team.name)) {
+              teamMap.set(team.name, {
+                id: team._id.toString(),
+                team: team.name,
+                email: team.email,
+                slotRef: useDynamicSlot ? -team.slot : team.slot,
+              });
+            }
+          }
+        }
+
+        const sortedTeams = Array.from(teamMap.values()).sort((a, b) => {
+          if (a.slotRef !== b.slotRef) return a.slotRef - b.slotRef;
+          return Math.abs(a.slotRef) - Math.abs(b.slotRef);
+        });
+
+        const finalTeams = useDynamicSlot
+          ? sortedTeams.map((team, i) => ({ ...team, slot: 5 + i }))
+          : sortedTeams.map((team) => ({ ...team, slot: Math.abs(team.slotRef) }));
+
+        teamsByGroupId[combinedGroupId].data = finalTeams;
+
+        teamsByGroupId[combinedGroupId].schedule.push({
+          id: schedule._id.toString(),
+          matchNo: schedule.stage?.isMultiGroup
+            ? schedule.overallMatchNo || schedule.matchNo
+            : schedule.matchNo,
+          map: schedule.map,
+          startTime: schedule.startTime,
+          date: schedule.date
+        });
+      }
+    }
+    
+    return {
+      isMultiGroup,
+      groups: Object.values(teamsByGroupId),
+    };
+  } catch (error) {
+    console.error("Error fetching group and schedule:", error);
+    throw error;
   }
-  return { groups: out, isMultiGroup: out.length > 1 };
 }
 
 export async function ImportDataDB(
@@ -115,7 +219,7 @@ export async function ImportDataDB(
     if (type === "event") {
       for (const r of rows) {
         if (!r.event || !r.stage || !r.group || !r.team) continue;
-        
+
         // 1. Event
         const event = await EventDB.findOneAndUpdate(
           { name: r.event },
@@ -234,21 +338,16 @@ export async function ImportDataDB(
 
         if (!groupIds.length) continue;
 
-        const schedule = await Schedule.findOneAndUpdate(
-          { stage: stage._id, matchNo: r.matchNo },
-          {
-            $set: {
-              event: event._id,
-              stage: stage._id,
-              groups: groupIds,
-              map: r.map,
-              startTime: r.startTime,
-              date: r.date,
-              overallMatchNo: r.overallMatchNo ?? null,
-            },
-          },
-          { new: true, upsert: true }
-        );
+        const schedule = await Schedule.create({
+          event: event._id,
+          stage: stage._id,
+          groups: groupIds,
+          matchNo: Number(r.matchNo) || 0,
+          map: r.map,
+          startTime: r.startTime,
+          date: r.date,
+          overallMatchNo: r.overallMatchNo ?? null,
+        });
 
         for (const gid of groupIds) {
           await Group.updateOne(
@@ -256,7 +355,9 @@ export async function ImportDataDB(
             { $addToSet: { schedules: schedule._id } }
           );
         }
+        console.log("Imported schedule of event:", event.name, "stage:", stage.name, "groups:", groups.join(", "), "matchNo:", r.matchNo);
       }
+      
 
       return { status: "success", message: "Schedule data imported successfully" };
     }
@@ -288,14 +389,12 @@ export async function ImportDataDB(
           { $setOnInsert: { name: r.teamName, tag: r.teamTag, event: event._id, stage: stage._id } },
           { new: true, upsert: true }
         );
-        console.log({ teamDoc });
-        
+
         const playerDoc = await Player.findOneAndUpdate(
           { uid: r.uid, email: r.emailId },
           { $setOnInsert: { uid: r.uid, email: r.emailId, team: teamDoc._id } },
           { new: true, upsert: true }
         );
-        console.log({ playerDoc });
         
         const guildDoc = await Guild.findOneAndUpdate(
           { guildId: r.guildId },
@@ -305,8 +404,6 @@ export async function ImportDataDB(
           },
           { new: true, upsert: true }
         );
-
-        console.log({ event, stage, teamDoc, playerDoc, guildDoc });
         
 
         await User.updateOne({ _id: userDoc._id }, { $addToSet: { events: event._id, guilds: guildDoc._id } });

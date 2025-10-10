@@ -62,7 +62,15 @@ export default function MatchDataSelector({
         return
       }
       const groupAndScheduleData = await getGroupAndSchedule(stage)
-      const { groups } = groupAndScheduleData
+      const { groups, isMultiGroup } = groupAndScheduleData
+      if (isMultiGroup) {
+       groups.push({
+          id: "all",
+          name: "All",
+          data: groups.flatMap((g) => g.data),
+          schedule: groups.flatMap((g) => g.schedule).sort((a,b)=> a.matchNo - b.matchNo),
+       })
+      }
       setGroupList(groups)
     }
     fetchGroupData()
