@@ -27,6 +27,11 @@ const teamColumns: ColumnDef<TeamResult>[] = [
     sortingFn: "basic",
   },
   {
+    accessorKey: "rank",
+    header: "Place",
+    sortingFn: "basic",
+  },
+  {
     accessorKey: "placePoint",
     header: "Place Points",
     sortingFn: "basic",

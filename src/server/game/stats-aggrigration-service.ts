@@ -54,6 +54,7 @@ export class StatsAggregationService {
   private static createEmptyTeamResult(teamName: string): TeamResult {
     return {
       team: textDecoder(teamName) || "Unknown Team",
+      rank: 0,
       kill: 0,
       damage: 0,
       placePoint: 0,
@@ -110,7 +111,7 @@ export class StatsAggregationService {
     teamData.totalPoint = teamData.placePoint + teamData.kill
     teamData.wwcd += stat.rank === 1 ? 1 : 0
     teamData.matchesPlayed += 1
-    teamData.lastMatchRank = stat.rank
+    teamData.rank = stat.rank
 
     // Additional stats
     teamData.survivalTime += stat.survivalTime

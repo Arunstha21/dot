@@ -66,8 +66,12 @@ export class PlayerValidationService {
 
     const teams: string[] = []
     for (const group of groups) {
-      if (group.teams) {
-        teams.push(...group.teams.map((team: any) => team.toString()))
+      for (const team of group.teams) {
+        if (typeof team === "object" && team._id) {
+          teams.push(team._id.toString());
+        } else if (typeof team === "string") {
+          teams.push(team);
+        }
       }
     }
     return teams
