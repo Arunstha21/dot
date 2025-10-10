@@ -7,10 +7,21 @@ export async function GET(request: Request, { params }: { params: Promise<{ even
         const { event } = await params;
         
         const data = await fs.readFile(filePath, 'utf-8');
-        const jsonData = JSON.parse(data);
-        
-        const filteredData = jsonData.filter((item: any) => item.event === event)[0];
-        const { data: matchData } = filteredData
+
+        interface MatchDataItem {
+            event: string;
+            data: any;
+            timestamp: string;
+        }
+
+        const jsonData: MatchDataItem[] = JSON.parse(data);
+        const existingItem: MatchDataItem | undefined = jsonData.find((item: MatchDataItem) => item.event === event);
+
+        if (!existingItem) {
+          return new Response(JSON.stringify({ error: "Event not found" }), { status: 404 });
+        }
+
+        const { data: matchData } = existingItem;
         return new Response(JSON.stringify(matchData), { status: 200 });
     } catch (err) {
         console.error(err);
