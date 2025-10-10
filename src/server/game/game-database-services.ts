@@ -11,7 +11,7 @@ export class DatabaseService {
     return Schedule.findById(scheduleId).populate({
       path: "groups",
       populate: {
-        path: "team",
+        path: "teams",
         strictPopulate: false,
       },
       strictPopulate: false,

@@ -66,7 +66,6 @@ export async function POST(
       timestamp: new Date().toISOString(),
     });
   }
-  console.log(`Updated data for event: ${event}`);
   
   await fs.writeFile(filePath, JSON.stringify(existingData, null, 2), "utf-8");
 

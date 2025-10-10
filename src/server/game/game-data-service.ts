@@ -172,11 +172,11 @@ export class GameDataService {
 
     const teams: string[] = []
     for (const group of groups) {
-      if (group.team) {
-        teams.push(...group.team)
+      if (group.teams && Array.isArray(group.teams)) {
+        teams.push(...group.teams)
       }
     }
-
+    
     await Promise.all(
       teams.map(async (teamId: string) => {
         const playerList = await DatabaseService.findPlayersByTeam(teamId)
@@ -189,7 +189,8 @@ export class GameDataService {
 
           const playerStats = this.createPlayerStatsObject(player, playerData._id, matchId)
           await DatabaseService.upsertPlayerStats(playerData._id, matchId, playerStats)
-
+          console.log(playerStats);
+          
           this.updateTeamStatsMap(teamStatsMap, playerData, player, matchId)
         }
 
