@@ -279,6 +279,7 @@ export default function ImportData() {
             group: String(row.group || ""),
             slot: Number(row.slot || 0),
             team: String(row.team || ""),
+            tag: String(row.tag || ""),
             email: String(row.email || ""),
             players: extractPlayers(row),
           }))
