@@ -1,7 +1,4 @@
-/**
- Public results data for the results pages (SSR only).
- We compute cumulative (afterMatch) data on-demand to avoid denormalization.
-*/
+
 import { dbConnect } from "@/lib/db"
 import { EventDB, Group, Schedule, Stage } from "@/lib/database/schema"
 import { PlayerResultDoc, TeamResultDoc } from "./match"
