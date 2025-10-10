@@ -202,6 +202,7 @@ export default function ImportData() {
             group: String(row.group || ""),
             slot: Number(row.slot || "0"),
             team: String(row.team || ""),
+            tag: String(row.tag || ""),
             email: String(row.email || ""),
             players: extractPlayers(row),
           }))
@@ -216,6 +217,7 @@ export default function ImportData() {
             map: String(row.map || ""),
             startTime: String(row.startTime || ""),
             date: String(row.date || ""),
+            overallMatchNo: Number(row.omNo || "0"),
           }))
           setData(normalized)
           toast.success(`Detected Schedule Data: ${normalized.length} records parsed`)
@@ -294,6 +296,7 @@ export default function ImportData() {
             map: String(row.map || ""),
             startTime: String(row.startTime || ""),
             date: String(row.date || ""),
+            overallMatchNo: Number(row.omNo || "0"),
           }))
           setData(normalized)
           toast.success(`Detected Schedule Data: ${normalized.length} records parsed`)
