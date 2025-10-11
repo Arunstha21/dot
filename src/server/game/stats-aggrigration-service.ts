@@ -29,6 +29,7 @@ export class StatsAggregationService {
     let totalSurvivalTime = 0
     let totalDamage = 0
     let totalKills = 0
+    let totalKnockouts = 0
 
     // Aggregate stats
     for (const stat of playerStats) {
@@ -43,10 +44,11 @@ export class StatsAggregationService {
       totalSurvivalTime += stat.survivalTime
       totalDamage += stat.damage
       totalKills += stat.killNum
+      totalKnockouts += stat.knockouts
     }
 
     // Calculate MVP scores
-    this.calculateMVPScores(playerResultsMap, totalSurvivalTime, totalDamage, totalKills)
+    this.calculateMVPScores(playerResultsMap, totalSurvivalTime, totalDamage, totalKills, totalKnockouts)
 
     return this.sortAndRankPlayers(Object.values(playerResultsMap))
   }
@@ -111,6 +113,7 @@ export class StatsAggregationService {
     teamData.totalPoint = teamData.placePoint + teamData.kill
     teamData.wwcd += stat.rank === 1 ? 1 : 0
     teamData.matchesPlayed += 1
+    teamData.lastMatchRank = stat.rank
     teamData.rank = stat.rank
 
     // Additional stats
@@ -152,6 +155,7 @@ export class StatsAggregationService {
     totalSurvivalTime: number,
     totalDamage: number,
     totalKills: number,
+    totalKnockouts: number,
   ) {
     for (const playerId in playerResultsMap) {
       const player = playerResultsMap[playerId]
@@ -159,13 +163,15 @@ export class StatsAggregationService {
       const survivalRatio = player.survivalTime / totalSurvivalTime
       const damageRatio = player.damage / totalDamage
       const killRatio = player.kill / totalKills
+      const knockoutRatio = player.knockouts / totalKnockouts
 
       player.avgSurvivalTime = player.survivalTime / player.matchesPlayed
       player.mvp = Number.parseFloat(
         (
           (survivalRatio * MVP_WEIGHTS.SURVIVAL_TIME +
             damageRatio * MVP_WEIGHTS.DAMAGE +
-            killRatio * MVP_WEIGHTS.KILLS) *
+            killRatio * MVP_WEIGHTS.KILLS +
+            knockoutRatio * MVP_WEIGHTS.KNOCKOUTS) *
           MVP_MULTIPLIER
         ).toFixed(2),
       )

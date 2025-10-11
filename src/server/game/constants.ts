@@ -1,7 +1,8 @@
 export const MVP_WEIGHTS = {
   SURVIVAL_TIME: 0.2,
   DAMAGE: 0.3,
-  KILLS: 0.5,
+  KILLS: 0.4,
+  KNOCKOUTS: 0.1,
 } as const
 
 export const MVP_MULTIPLIER = 100

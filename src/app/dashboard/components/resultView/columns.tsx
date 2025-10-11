@@ -113,7 +113,7 @@ interface TournamentResultsProps {
 }
 
 export function TournamentResults({ data, sendResultData, isLoading }: TournamentResultsProps) {
-  
+
   if (isLoading) {
     return (
       <div className="space-y-8">
@@ -155,9 +155,6 @@ export function TournamentResults({ data, sendResultData, isLoading }: Tournamen
           <DataTable columns={playerColumns} data={data.playerResults} />
         </div>
       )}
-
-
-
     </div>
   )
 }
