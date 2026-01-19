@@ -1,3 +1,4 @@
+'use server'
 
 import { dbConnect } from "@/lib/db"
 import { EventDB, Group, Schedule, Stage } from "@/lib/database/schema"

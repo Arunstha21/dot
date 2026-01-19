@@ -1,6 +1,7 @@
 'use server';
 
-import { EventDB, Group, IEvent, IStage, Player, RoleManagerUser, Schedule, Stage, Team } from "@/lib/database/schema";
+import { EventDB, Group, Player, RoleManagerUser, Schedule, Stage, Team } from "@/lib/database/schema";
+import { eventCacheManager, scheduleCacheManager } from "./cache/simple-cache";
 import { dbConnect } from "@/lib/db"
 import mongoose from "mongoose";
 import { getServerSession } from "next-auth";
@@ -41,33 +42,56 @@ export type ScheduleData = {
 
 export async function getEventData(): Promise<EventData[]> {
   const session = await getServerSession(authConfig)
+
+  // Create cache key from user ID
+  const cacheKey = `events:${session?.user?.id || 'anonymous'}`
+
+  // Check cache first
+  const cached = eventCacheManager.get(cacheKey) as EventData[] | null
+  if (cached) {
+    return cached
+  }
+
   await dbConnect()
   if (!session?.user?.id) return []
   const userDoc = await User.findById(session.user.id);
   if (!userDoc) return []
-  let events: IEvent[] = []
+  let events: any[] = []
   if (!userDoc.superUser) {
-    events = await EventDB.find({ _id: { $in: userDoc.events } }) as IEvent[]
+    events = await EventDB.find({ _id: { $in: userDoc.events } }).lean()
   } else {
-    events = await EventDB.find() as IEvent[]
+    events = await EventDB.find().lean()
   }
 
-  const result: EventData[] = []
-  for (const e of events) {
-    const stages = await Stage.find({ event: e._id }) as IStage[]
-    result.push({
-      id: e._id.toString(),
-      name: e.name,
-      organizer: e.organizer,
-      stages: stages.map((s) => ({ id: s._id.toString(), name: s.name, isMultiGroup: s.isMultiGroup })),
-    })
-  }
+  // Parallel stage fetching for better performance
+  const stagePromises = events.map(e => Stage.find({ event: e._id }).lean())
+  const allStages = await Promise.all(stagePromises)
+
+  const result: EventData[] = events.map((e, index) => ({
+    id: e._id.toString(),
+    name: e.name,
+    organizer: e.organizer,
+    stages: allStages[index].map((s: any) => ({ id: s._id.toString(), name: s.name, isMultiGroup: s.isMultiGroup })),
+  }))
+
+  // Cache the result
+  eventCacheManager.set(cacheKey, result)
+
   return result
 }
 
 export async function getGroupAndSchedule(
   stageId: string
 ): Promise<{ groups: GroupAndSchedule[]; isMultiGroup: boolean }> {
+  // Create cache key
+  const cacheKey = `schedule:${stageId}`
+
+  // Check cache first
+  const cached = scheduleCacheManager.get(cacheKey) as { groups: GroupAndSchedule[]; isMultiGroup: boolean } | null
+  if (cached) {
+    return cached
+  }
+
   await dbConnect();
 
   try {
@@ -81,6 +105,7 @@ export async function getGroupAndSchedule(
       })
       .populate("stage")
       .sort({ matchNo: 1 })
+      .lean() // Add .lean() for better performance
       .exec();
 
     const teamsByGroupId: Record<string, GroupAndSchedule> = {};
@@ -124,7 +149,7 @@ export async function getGroupAndSchedule(
         teamsByGroupId[group._id].data = Array.from(teamMap.values()).sort((a, b) => a.slot - b.slot);
 
         teamsByGroupId[group._id].schedule.push({
-          id: schedule._id.toString(),
+          id: getId(schedule),
           matchNo: schedule.stage?.isMultiGroup
             ? schedule.overallMatchNo || schedule.matchNo
             : schedule.matchNo,
@@ -183,7 +208,7 @@ export async function getGroupAndSchedule(
         teamsByGroupId[combinedGroupId].data = finalTeams;
 
         teamsByGroupId[combinedGroupId].schedule.push({
-          id: schedule._id.toString(),
+          id: getId(schedule),
           matchNo: schedule.stage?.isMultiGroup
             ? schedule.overallMatchNo || schedule.matchNo
             : schedule.matchNo,
@@ -193,15 +218,25 @@ export async function getGroupAndSchedule(
         });
       }
     }
-    
-    return {
+
+    const result = {
       isMultiGroup,
       groups: Object.values(teamsByGroupId),
     };
+
+    // Cache the result
+    scheduleCacheManager.set(cacheKey, result)
+
+    return result;
   } catch (error) {
     console.error("Error fetching group and schedule:", error);
     throw error;
   }
+}
+
+// Type-safe ID extraction helper
+function getId(doc: any): string {
+  return doc._id?.toString() || ''
 }
 
 export async function ImportDataDB(

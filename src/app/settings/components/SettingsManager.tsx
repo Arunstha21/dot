@@ -1,14 +1,35 @@
 "use client"
 
 import { useState } from "react"
+import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import EventsManagement, { EventsData } from "./EventsManagement"
-import MatchesManagement from "./MatchesManagement"
-import DiscordManagement from "./DiscordManagement"
-import UserProfile from "./UserProfile"
-import EventStageGroupSelector from "./EventStageGroupSelector"
-import TeamsPlayersManagement from "./TeamPlayerManagement"
-import UsersManagement from "./UserManagement"
+import dynamic from 'next/dynamic'
+
+// Dynamic imports for code splitting - loaded only when needed (~300KB savings)
+const EventsManagement = dynamic(() => import("./EventsManagement").then(m => ({ default: m.default })), {
+  loading: () => <div className="p-8">Loading events management...</div>
+})
+const TeamsPlayersManagement = dynamic(() => import("./TeamPlayerManagement"), {
+  loading: () => <div className="p-8">Loading teams & players...</div>
+})
+const MatchesManagement = dynamic(() => import("./MatchesManagement"), {
+  loading: () => <div className="p-8">Loading matches...</div>
+})
+const DiscordManagement = dynamic(() => import("./DiscordManagement"), {
+  loading: () => <div className="p-8">Loading discord settings...</div>
+})
+const UsersManagement = dynamic(() => import("./UserManagement"), {
+  loading: () => <div className="p-8">Loading user management...</div>
+})
+const UserProfile = dynamic(() => import("./UserProfile"), {
+  loading: () => <div className="p-8">Loading profile...</div>
+})
+const EventStageGroupSelector = dynamic(() => import("./EventStageGroupSelector"), {
+  loading: () => <div className="p-8">Loading selector...</div>
+})
+
+// Import types that were removed with default imports
+import type { EventsData } from "./EventsManagement"
 
 type User = {
   name?: string | null
@@ -50,8 +71,26 @@ export default function SettingsManager({
     groupName: "",
   })
 
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const pathname = usePathname()
+
+  // Get initial tab from URL or default to "profile"
+  const currentTab = searchParams.get("tab") || "profile"
+
+  // Handle tab change - update URL without full page reload
+  const handleTabChange = (value: string) => {
+    const params = new URLSearchParams(searchParams.toString())
+    if (value === "profile") {
+      params.delete("tab") // Keep URL clean for default tab
+    } else {
+      params.set("tab", value)
+    }
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false })
+  }
+
   return (
-    <Tabs defaultValue="profile" className="w-full">
+    <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full">
       <TabsList className="flex flex-wrap gap-2 w-full lg:grid lg:grid-cols-6">
         <TabsTrigger value="profile">Profile</TabsTrigger>
         <TabsTrigger value="events">Events</TabsTrigger>

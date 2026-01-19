@@ -100,7 +100,7 @@ export function TicketSystemSetup({ guildId, guildName, channels, onSetupComplet
 
     setLoading(true)
     try {
-      const result = await toggleTicketStatus(config._id as string, config.status !== "active")
+      const result = await toggleTicketStatus(config._id.toString(), config.status !== "active")
       if (result.success) {
         toast.success(`Ticket system ${config.status === "active" ? "disabled" : "enabled"}`)
         loadTicketConfig()
@@ -300,7 +300,7 @@ export function TicketSystemSetup({ guildId, guildName, channels, onSetupComplet
               </TableHeader>
               <TableBody>
                 {tickets.slice(0, 5).map((ticket) => (
-                  <TableRow key={ticket._id as string}>
+                  <TableRow key={ticket._id.toString()}>
                     <TableCell className="font-medium">{ticket.user}</TableCell>
                     <TableCell>
                       <Badge variant="outline">{ticket.ticketType}</Badge>

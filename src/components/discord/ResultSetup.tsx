@@ -53,8 +53,8 @@ export function DiscordSetup({ stageId, onSetupComplete, onGuildChange }: Discor
   const prevGuildId = useRef<string | null>(null)
 
   useEffect(() => {
-    if (guild && guild._id !== prevGuildId.current) {
-      prevGuildId.current = String(guild._id)
+    if (guild && guild._id.toString() !== prevGuildId.current) {
+      prevGuildId.current = guild._id.toString()
       onGuildChange?.(guild)
     }
   }, [guild])

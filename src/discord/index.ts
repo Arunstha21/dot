@@ -29,7 +29,7 @@ export const client = new Client({
   ],
 });
 
-client.once('ready', () => {
+client.once('clientReady', () => {
   logger.info(`Discord client started as ${client.user?.tag}`);
 });
 

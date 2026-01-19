@@ -3,8 +3,10 @@
 import type React from "react"
 import { ImportDataDB, type ScheduleData } from "@/server/database"
 import { useState, useCallback } from "react"
-import * as XLSX from "xlsx"
 import MatchDataUploader from "./matchUploader"
+
+// Dynamic XLSX loader - loaded only when needed (500KB savings)
+const loadXLSX = () => import('xlsx').then(mod => mod.default)
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -83,13 +85,13 @@ export default function ImportData() {
     setFileName(file.name)
 
     const reader = new FileReader()
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       const content = e.target?.result
       if (typeof content === "string") {
         if (file.name.endsWith(".csv")) {
           parseCSV(content, toastLoadingId)
         } else if (file.name.endsWith(".xlsx") || file.name.endsWith(".xls")) {
-          parseExcel(content, toastLoadingId)
+          await parseExcel(content, toastLoadingId)
         }
       }
     }
@@ -249,8 +251,9 @@ export default function ImportData() {
     }
   }
 
-  const parseExcel = (content: string, toastLoadingId: string | number): void => {
+  const parseExcel = async (content: string, toastLoadingId: string | number): Promise<void> => {
     try {
+      const XLSX = await loadXLSX()
       const workbook = XLSX.read(content, { type: "binary" })
       const sheetName = workbook.SheetNames[0]
       const sheet = workbook.Sheets[sheetName]

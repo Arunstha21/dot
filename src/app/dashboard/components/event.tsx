@@ -151,6 +151,7 @@ export default function Event() {
         group,
         groupName: eventDetails.groupName,
         groupings,
+        isMultiGroup,
       } as IDPass)
     } else {
       setSubject(
@@ -169,6 +170,7 @@ export default function Event() {
         groupName: eventDetails.groupName,
         matches,
         groupings,
+        isMultiGroup,
       } as Grouping)
     }
   }, [
@@ -184,6 +186,7 @@ export default function Event() {
     group,
     groupings,
     matches,
+    isMultiGroup,
     eventData,
     eventList,
     stageList,
@@ -312,6 +315,7 @@ function renderMessageHtml(type: "ID Pass" | "Groupings", data: IDPass | Groupin
           <p>Hi Team,</p>
           <p>${escape(d.event)} of ${escape(d.stage)}</p>
           <p>Match ${escape(d.matchNo)} for your group is scheduled for ${escape(d.date)} at ${escape(d.startTime)}.</p>
+          ${d.isMultiGroup ? '<p><strong>Note:</strong> This is a multi-group match where teams from different groups will be competing against each other.</p>' : ''}
           <p>Please be on time and don't forget to stay in your specific slot.</p>
           <p>Please find the match credentials below:</p>
         </div>
@@ -360,6 +364,7 @@ function renderMessageHtml(type: "ID Pass" | "Groupings", data: IDPass | Groupin
       <div contenteditable="true" suppresscontenteditablewarning="true">
         <p>Hi Team,</p>
         <p>Reminder! for ${escape(d.event)} of ${escape(d.stage)}. Here are the details for your matches.</p>
+        ${d.isMultiGroup ? '<p><strong>Note:</strong> This stage includes multi-group matches where teams from different groups compete against each other.</p>' : ''}
         <h3>Matches :-</h3>
       </div>
       <table style="border-collapse: collapse; width: 100%; max-width: 560px; margin: 0 auto; font-size: 14px;">

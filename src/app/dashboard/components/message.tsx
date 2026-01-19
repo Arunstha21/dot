@@ -25,6 +25,7 @@ export type IDPass = {
   group: string
   groupName: string
   groupings: Groupings[]
+  isMultiGroup: boolean // Indicates if this is a multi-group stage (groups playing against each other)
 }
 
 export type Grouping = {
@@ -36,6 +37,7 @@ export type Grouping = {
   groupName: string
   matches: Matches[]
   groupings: Groupings[]
+  isMultiGroup: boolean // Indicates if this is a multi-group stage (groups playing against each other)
 }
 
 type Props = {

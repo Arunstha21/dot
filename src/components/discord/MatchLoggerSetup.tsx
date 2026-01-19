@@ -92,7 +92,7 @@ export function MatchLoggerSetup({ guildId, guildName, channels, onSetupComplete
 
     setLoading(true)
     try {
-      const result = await toggleMatchLoggerStatus(logger._id as string, !logger.active)
+      const result = await toggleMatchLoggerStatus(logger._id.toString(), !logger.active)
       if (result.success) {
         toast.success(`Match logger ${logger.active ? "disabled" : "enabled"}`)
         loadMatchLogger()
@@ -231,7 +231,7 @@ export function MatchLoggerSetup({ guildId, guildName, channels, onSetupComplete
               </TableHeader>
               <TableBody>
                 {logs.slice(0, 5).map((log) => (
-                  <TableRow key={log._id as unknown as string}>
+                  <TableRow key={log._id.toString()}>
                     <TableCell className="font-medium">{log.matchId}</TableCell>
                     <TableCell>
                       <Badge

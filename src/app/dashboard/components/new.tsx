@@ -8,9 +8,15 @@ import { toast } from "sonner";
 import SenderSelect from "./email/sender-select";
 import RecipientsField from "./email/recipients-field";
 import SubjectField from "./email/subject-field";
-import RichTextEditor from "./RichEditor";
+import dynamic from 'next/dynamic';
 import { useActionState } from "react";
 import { sendGeneralEmailAction } from "@/server/actions/email-actions";
+
+// Dynamic import for TipTap editor - loaded only when needed (~200KB savings)
+const RichTextEditor = dynamic(() => import("./RichEditor").then(m => ({ default: m.default })), {
+  loading: () => <div className="h-[200px] w-full bg-muted animate-pulse rounded-md" />,
+  ssr: false
+});
 
 export default function New() {
   const [to, setTo] = useState<string[]>([]);

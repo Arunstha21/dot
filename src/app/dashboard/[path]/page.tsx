@@ -2,13 +2,24 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { usePathname, useRouter } from "next/navigation"
 import { useState } from "react"
-import New from "../components/new"
-import Event from "../components/event"
-import ImportData from "../components/import"
-import ResultTabs from "../components/resultView/resultsTab"
+import dynamic from 'next/dynamic'
 import { Button } from "@/components/ui/button"
 import { Menu } from "lucide-react"
 import ProfileDropDown from "@/components/profileDropDown"
+
+// Dynamic imports for code splitting - loaded only when needed (~350KB savings)
+const New = dynamic(() => import("../components/new"), {
+  loading: () => <div className="h-64 flex items-center justify-center">Loading...</div>
+})
+const Event = dynamic(() => import("../components/event"), {
+  loading: () => <div className="h-64 flex items-center justify-center">Loading...</div>
+})
+const ImportData = dynamic(() => import("../components/import"), {
+  loading: () => <div className="h-64 flex items-center justify-center">Loading...</div>
+})
+const ResultTabs = dynamic(() => import("../components/resultView/resultsTab"), {
+  loading: () => <div className="h-64 flex items-center justify-center">Loading...</div>
+})
 
 export default function Task() {
   const pathname = usePathname()

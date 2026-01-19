@@ -40,7 +40,7 @@ const PROTECTED_MATCHERS: Array<{ pattern: RegExp; requireSuperUser?: boolean }>
   { pattern: /^\/api\/private(\/|$)/ }, // example: protect other private APIs
 ]
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   try {
     const ip = (req.headers.get("x-real-ip") || req.headers.get("x-forwarded-for") || "unknown") as string
 
