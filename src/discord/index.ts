@@ -137,7 +137,19 @@ client.on('messageCreate', async (message) => {
 // });
 
 client.on('error', (error) => {
-  console.error('Discord client encountered an error:', error);
+  logger.error('Discord client encountered an error:', error);
+});
+
+// Global error handlers for process-level errors
+process.on('unhandledRejection', (error) => {
+  logger.error('Unhandled promise rejection:', error);
+});
+
+process.on('uncaughtException', (error) => {
+  logger.error('Uncaught exception:', error);
+  // Graceful shutdown - destroy the Discord client connection
+  client.destroy();
+  process.exit(1);
 });
 
 

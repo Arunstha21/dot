@@ -6,7 +6,7 @@ import StageGroupHeader from "./stage-group-header"
 import type { GroupAndSchedule } from "@/server/publicResult"
 import MatchSelector from "./match-selector"
 import { useEffect, useState } from "react"
-import { TournamentResults } from "@/app/dashboard/components/resultView/columns"
+import { TournamentResults } from "@/components/dashboard/actions/results/ResultsColumns"
 import { PlayerResult, TeamResult } from "@/server/game/game-type"
 
 export default function ResultsPage({
@@ -43,6 +43,7 @@ function ResultsContent({ matchDetails }: { matchDetails: GroupAndSchedule["sche
   )
 
   useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect */
     const results = matchDetails.find((match) => match.id === selectedMatch) as any
     if (results) {
       if (afterMatch) {
@@ -63,9 +64,11 @@ function ResultsContent({ matchDetails }: { matchDetails: GroupAndSchedule["sche
         setTeams((results.matchData?.teamResults || []).map((t: TeamResult) => t.team))
       }
     }
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, [selectedMatch, afterMatch, selectedResultType, matchDetails])
 
   useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect */
     if (selectedTeam === "All Teams") {
       setResultData((prev) => (prev ? { teamResults: prev.teamResults, playerResults: prev.playerResults } : null))
     } else {
@@ -77,6 +80,7 @@ function ResultsContent({ matchDetails }: { matchDetails: GroupAndSchedule["sche
         }
       })
     }
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, [selectedTeam])
 
   return (

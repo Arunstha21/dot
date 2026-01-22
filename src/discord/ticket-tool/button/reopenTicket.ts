@@ -8,6 +8,7 @@ import {
   ChannelType,
   MessageFlags
 } from 'discord.js';
+import { logger } from '../../logger';
 
 export async function handleReopenTicket(interaction: ButtonInteraction) {
   const { channel, user } = interaction;
@@ -61,7 +62,7 @@ export async function handleReopenTicket(interaction: ButtonInteraction) {
       { status: 'open', closedBy: null, closeReason: null }
     );
   } catch (err) {
-    console.error('Error reopening ticket:', err);
+    logger.error('Error reopening ticket:', err);
     await interaction.editReply({ content: '❌ Failed to reopen the ticket.' });
   }
 }

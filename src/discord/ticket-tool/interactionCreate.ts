@@ -1,4 +1,5 @@
 import { ChatInputCommandInteraction, ButtonInteraction, ChannelSelectMenuInteraction, Interaction, MessageFlags } from 'discord.js';
+import { logger } from '../logger';
 import { activateTicket } from './commands/activate';
 import { deactivateTicket } from './commands/deactivate';
 import { configureTicket } from './commands/configure';
@@ -58,7 +59,7 @@ export const interactionCreate = {
       }
 
     } catch (error) {
-      console.error(`Interaction handler error: ${error}`);
+      logger.error(`Interaction handler error: ${error}`);
       if (
         (interaction.isChatInputCommand() ||
           interaction.isButton() ||

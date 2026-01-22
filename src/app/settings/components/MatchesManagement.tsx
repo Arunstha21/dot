@@ -40,6 +40,7 @@ export default function MatchesManagement({
 
   useEffect(() => {
     if (selectedGroup) loadMatches()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedGroup])
 
   const loadMatches = async () => {

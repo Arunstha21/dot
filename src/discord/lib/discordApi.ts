@@ -1,4 +1,4 @@
-import { REST, Routes } from 'discord.js';
+import { REST, Routes, RESTGetAPIApplicationCommandsResult } from 'discord.js';
 import 'dotenv/config';
 
 const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN!);
@@ -20,8 +20,8 @@ export function getCommandPermissionsRoute(guildId: string) {
   );
 }
 
-export async function getGuildCommandList(guildId: string) {
-	return rest.get(Routes.applicationGuildCommands(process.env.DISCORD_CLIENT_ID!, guildId)) as Promise<any[]>;
+export async function getGuildCommandList(guildId: string): Promise<RESTGetAPIApplicationCommandsResult> {
+	return rest.get(Routes.applicationGuildCommands(process.env.DISCORD_CLIENT_ID!, guildId)) as Promise<RESTGetAPIApplicationCommandsResult>;
 }
 
 // Route to delete a command using its ID (helper for deleteModuleCommand)

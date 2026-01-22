@@ -9,7 +9,7 @@ import { getAllGuilds, fetchDiscordChannels, GuildData } from "@/server/actions/
 import { toast } from "sonner"
 import { DiscordSetup } from "@/components/discord/ResultSetup"
 import { MatchLoggerSetup } from "@/components/discord/MatchLoggerSetup"
-import { TicketSystemSetup } from "@/components/discord/TicektSystemSetup"
+import { TicketSystemSetup } from "@/components/discord/TicketSystemSetup"
 import { RoleManagerSetup } from "@/components/discord/RoleManagerSetup"
 
 export default function DiscordManagement({
@@ -47,7 +47,7 @@ export default function DiscordManagement({
     } finally {
       setLoading(false)
     }
-  }, [stageId, loading])
+  }, [stageId])
 
 
   if (loading) {

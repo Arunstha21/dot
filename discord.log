@@ -255,3 +255,51 @@ application_id[NUMBER_TYPE_COERCE]: Value "undefined" is not snowflake.
 11:35:30 19/01/2026 - info: Discord client started as Dot test#0248
 13:02:13 19/01/2026 - info: Discord client started successfully.
 13:02:13 19/01/2026 - info: Discord client started as Dot test#0248
+14:11:05 19/01/2026 - info: Discord client started successfully.
+14:11:05 19/01/2026 - info: Discord client started as Dot test#0248
+18:26:11 19/01/2026 - info: Discord client started successfully.
+18:26:11 19/01/2026 - info: Discord client started as Dot test#0248
+18:42:37 19/01/2026 - info: Discord client started successfully.
+18:42:37 19/01/2026 - info: Discord client started as Dot test#0248
+09:47:09 21/01/2026 - info: Discord client started successfully.
+09:47:09 21/01/2026 - info: Discord client started as Dot test#0248
+09:47:20 21/01/2026 - error: Error fetching Discord channels: Discord API error 403: {"message": "Missing Access", "code": 50001}
+09:47:20 21/01/2026 - error: Error fetching Discord channels: Discord API error 403: {"message": "Missing Access", "code": 50001}
+09:47:21 21/01/2026 - error: Error checking bot presence: Discord API error 429: {"message": "You are being rate limited.", "retry_after": 0.638, "global": false}
+10:31:35 21/01/2026 - info: Discord client started successfully.
+10:31:35 21/01/2026 - info: Discord client started as Dot test#0248
+10:32:26 21/01/2026 - error: Error fetching Discord channels: Discord API error 403: {"message": "Missing Access", "code": 50001}
+10:32:26 21/01/2026 - error: Error fetching Discord channels: Discord API error 403: {"message": "Missing Access", "code": 50001}
+10:32:27 21/01/2026 - error: Error checking bot presence: Discord API error 429: {"message": "You are being rate limited.", "retry_after": 0.456, "global": false}
+10:35:32 21/01/2026 - error: Error fetching Discord channels: Discord API error 403: {"message": "Missing Access", "code": 50001}
+10:35:32 21/01/2026 - error: Error fetching Discord channels: Discord API error 403: {"message": "Missing Access", "code": 50001}
+10:35:34 21/01/2026 - error: Error checking bot presence: Discord API error 429: {"message": "You are being rate limited.", "retry_after": 0.451, "global": false}
+10:36:14 21/01/2026 - info: Discord client started successfully.
+10:36:15 21/01/2026 - info: Discord client started as Dot test#0248
+10:36:20 21/01/2026 - error: Error fetching Discord channels: Discord API error 403: {"message": "Missing Access", "code": 50001}
+10:36:21 21/01/2026 - error: Error fetching Discord channels: Discord API error 403: {"message": "Missing Access", "code": 50001}
+10:36:22 21/01/2026 - error: Error checking bot presence: Discord API error 429: {"message": "You are being rate limited.", "retry_after": 0.509, "global": false}
+10:36:43 21/01/2026 - error: Error fetching Discord channels: Discord API error 403: {"message": "Missing Access", "code": 50001}
+10:36:44 21/01/2026 - error: Error fetching Discord channels: Discord API error 403: {"message": "Missing Access", "code": 50001}
+10:36:45 21/01/2026 - error: Error checking bot presence: Discord API error 429: {"message": "You are being rate limited.", "retry_after": 0.45, "global": false}
+10:41:43 21/01/2026 - error: Error fetching Discord channels: Discord API error 403: {"message": "Missing Access", "code": 50001}
+10:41:44 21/01/2026 - error: Error fetching Discord channels: Discord API error 403: {"message": "Missing Access", "code": 50001}
+10:41:45 21/01/2026 - error: Error checking bot presence: Discord API error 429: {"message": "You are being rate limited.", "retry_after": 0.506, "global": false}
+10:50:28 21/01/2026 - error: Error fetching Discord channels: Discord API error 403: {"message": "Missing Access", "code": 50001}
+10:50:28 21/01/2026 - error: Error fetching Discord channels: Discord API error 403: {"message": "Missing Access", "code": 50001}
+10:50:29 21/01/2026 - error: Error checking bot presence: Discord API error 429: {"message": "You are being rate limited.", "retry_after": 0.505, "global": false}
+10:51:37 21/01/2026 - error: Error fetching Discord channels: Discord API error 403: {"message": "Missing Access", "code": 50001}
+10:51:38 21/01/2026 - error: Error fetching Discord channels: Discord API error 403: {"message": "Missing Access", "code": 50001}
+10:51:39 21/01/2026 - error: Error checking bot presence: Discord API error 429: {"message": "You are being rate limited.", "retry_after": 0.526, "global": false}
+10:51:50 21/01/2026 - error: Error fetching Discord channels: Discord API error 403: {"message": "Missing Access", "code": 50001}
+10:51:51 21/01/2026 - error: Error fetching Discord channels: Discord API error 403: {"message": "Missing Access", "code": 50001}
+10:51:52 21/01/2026 - error: Error checking bot presence: Discord API error 429: {"message": "You are being rate limited.", "retry_after": 0.499, "global": false}
+10:54:03 21/01/2026 - error: Uncaught exception: aborted
+10:57:13 21/01/2026 - info: Discord client started successfully.
+10:57:13 21/01/2026 - info: Discord client started as Dot test#0248
+10:58:05 21/01/2026 - error: Error fetching Discord channels: Discord API error 403: {"message": "Missing Access", "code": 50001}
+10:58:05 21/01/2026 - error: Error fetching Discord channels: Discord API error 403: {"message": "Missing Access", "code": 50001}
+10:58:06 21/01/2026 - error: Error checking bot presence: Discord API error 429: {"message": "You are being rate limited.", "retry_after": 0.484, "global": false}
+12:58:45 21/01/2026 - error: Uncaught exception: aborted
+13:16:00 21/01/2026 - info: Discord client started successfully.
+13:16:00 21/01/2026 - info: Discord client started as Dot test#0248

@@ -49,7 +49,7 @@ export async function onJoin(member: GuildMember): Promise<void> {
   if (team?.teamTag) {
     const userName = (member.user as User & { globalName?: string }).globalName || member.user.username;
     const name = `${team.teamTag} | ${userName}`;
-    await member.setNickname(name).catch(console.error);
+    await member.setNickname(name).catch((err) => logger.error('Failed to set nickname:', err));
     logger.info(`Nickname set to ${name} for ${member.user.username}`);
   }
 }
@@ -165,7 +165,7 @@ export async function verify(interaction: ChatInputCommandInteraction): Promise<
       if (userName && userName.length !== 22) {
         const name = `${team?.teamTag || ''} | ${userName}`;
         await (interaction.member as GuildMember).setNickname(name).catch(err => {
-          console.error("Failed to set nickname:", err);
+          logger.error("Failed to set nickname:", err);
         });
         logger.info(`Nickname set to ${name} for ${interaction.member?.user.username}`);
       }
@@ -186,12 +186,12 @@ export async function verify(interaction: ChatInputCommandInteraction): Promise<
     await interaction.editReply({ embeds: [MessageEmbed] });
     setTimeout(() => {
       if ((interaction.channel as TextChannel)?.delete) {
-        (interaction.channel as TextChannel).delete().catch(console.error);
+        (interaction.channel as TextChannel).delete().catch((err) => logger.error('Failed to delete channel:', err));
       }
     }, 2000);
 
   } catch (error) {
-    console.error("Error during verification:", error);
+    logger.error("Error during verification:", error);
   }
 }
 type PopulatedRoleManagerUser = Omit<IRoleManagerUser, "player"> & {
@@ -237,8 +237,6 @@ export async function checkUser(
 
   return userRecord || false;
 }
-
-
 
 export async function close(interaction: ChatInputCommandInteraction): Promise<void> {
   const { username, id, globalName } = interaction.user as User & { globalName?: string };

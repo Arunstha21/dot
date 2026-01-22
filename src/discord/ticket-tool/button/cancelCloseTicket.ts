@@ -1,4 +1,5 @@
 import { ButtonInteraction, MessageFlags } from 'discord.js';
+import { logger } from '../../logger';
 
 export async function handleCancelClose(interaction: ButtonInteraction) {
   if (!interaction.deferred && !interaction.replied) {
@@ -14,7 +15,7 @@ export async function handleCancelClose(interaction: ButtonInteraction) {
     try {
       await oldMessage.delete();
     } catch (error) {
-      console.error('Failed to delete old message:', error);
+      logger.error('Failed to delete old message:', error);
     }
   }
 }

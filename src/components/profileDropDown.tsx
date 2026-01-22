@@ -34,7 +34,7 @@ export default function ProfileDropDown({ page }: { page: "dashboard" | "setting
         <DropdownMenuItem asChild>
           {page === "dashboard" ? (<Link href="/settings">
             <Settings className="mr-2 h-4 w-4" /> Settings
-          </Link>): (<Link href="/dashboard/new">
+          </Link>): (<Link href="/dashboard/compose-new">
             <LayoutDashboard className="mr-2 h-4 w-4" /> Dashboard
           </Link>)}
         </DropdownMenuItem>

@@ -114,6 +114,7 @@ export default function EventsManagement({
   )
 
   useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect */
     for (const s of [
       delEventState,
       delStageState,
@@ -132,6 +133,7 @@ export default function EventsManagement({
         setEditGroupDialogOpen(false)
       }
     }
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, [
     delEventState,
     delStageState,

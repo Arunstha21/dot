@@ -49,7 +49,7 @@ export default function LoginPage() {
         return
       }
       toast.success("Login successful")
-      router.push("/dashboard/new")
+      router.push("/dashboard/compose-new")
     } catch {
       toast.error("Failed to log in. Please try again.")
       toast.dismiss(toastLoadingId)

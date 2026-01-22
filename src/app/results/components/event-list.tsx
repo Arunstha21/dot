@@ -2,9 +2,12 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Menu } from "lucide-react"
 import EventDialog from "./event-dialogue"
 import { EventData, GroupAndSchedule } from "@/server/publicResult"
 import ResultsPage from "./resultsPage"
+import { NoResultsSelected } from "./empty-states"
 
 export default function EventList({ eventsData }: { eventsData: EventData[] }) {
   const [selectedEvent, setSelectedEvent] = useState<EventData | null>(null)
@@ -14,30 +17,53 @@ export default function EventList({ eventsData }: { eventsData: EventData[] }) {
     groupAndSchedule: GroupAndSchedule | null
   } | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [sheetOpen, setSheetOpen] = useState(false)
 
   const handleEventClick = (event: EventData) => {
     setSelectedEvent(event)
     setSelectedData(null)
     setDialogOpen(true)
+    setSheetOpen(false)
   }
+
+  const sidebarContent = (
+    <div className="space-y-2">
+      <h3 className="text-sm font-semibold mb-3 px-1">Events</h3>
+      {eventsData.map((event) => (
+        <Button
+          key={event.id}
+          variant="outline"
+          className="w-full justify-start text-sm truncate overflow-hidden text-ellipsis"
+          onClick={() => handleEventClick(event)}
+        >
+          {event.name}
+        </Button>
+      ))}
+    </div>
+  )
+
   return (
     <div className="flex flex-1 h-screen">
-      <aside className="w-64 border-r p-4">
-        <div className="space-y-2">
-          {eventsData.map((event) => (
-            <Button
-              key={event.id}
-              variant="outline"
-              className="w-full justify-start text-sm truncate overflow-hidden text-ellipsis"
-              onClick={() => handleEventClick(event)}
-            >
-              {event.name}
-            </Button>
-          ))}
-        </div>
+      {/* Desktop sidebar */}
+      <aside className="hidden md:block w-64 border-r p-4">
+        {sidebarContent}
       </aside>
 
-      <main className="flex-1 p-4">
+      {/* Mobile sidebar with Sheet */}
+      <div className="md:hidden absolute top-16 left-4 z-10">
+        <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+          <SheetTrigger asChild>
+            <Button variant="outline" size="icon">
+              <Menu className="h-5 w-5" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="w-64">
+            {sidebarContent}
+          </SheetContent>
+        </Sheet>
+      </div>
+
+      <main className="flex-1 p-4 mt-12 md:mt-0">
         <div className="flex h-full">
           {selectedData && !dialogOpen ? (
             <ResultsPage
@@ -47,7 +73,7 @@ export default function EventList({ eventsData }: { eventsData: EventData[] }) {
               data={selectedData.groupAndSchedule as GroupAndSchedule}
             />
           ) : (
-            <p className="text-muted-foreground">Select an event to view details</p>
+            <NoResultsSelected />
           )}
         </div>
       </main>

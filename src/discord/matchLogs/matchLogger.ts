@@ -75,7 +75,7 @@ export async function matchLogger(interaction: ChatInputCommandInteraction): Pro
     await matchLogChannel.send({ embeds: [embed] });
 
   } catch (error) {
-    console.error("Error saving match log:", error);
+    logger.error("Error saving match log:", error);
     if (interaction.replied || interaction.deferred) {
       await interaction.editReply("An error occurred while saving the match log.");
     } else {
@@ -122,7 +122,7 @@ export async function activateLogger(interaction: ChatInputCommandInteraction): 
     logger.info(`Logger activated successfully in ${channel.name} for guild ${guildId}.`);
 
   } catch (error) {
-    console.error("Error activating logger:", error);
+    logger.error("Error activating logger:", error);
     if (interaction.replied || interaction.deferred) {
       await interaction.editReply("An error occurred while activating the logger.");
     } else {
@@ -153,7 +153,7 @@ export async function deactivateLogger(interaction: ChatInputCommandInteraction)
     logger.info(`Logger deactivated successfully for guild ${guildId}.`);
 
   } catch (error) {
-    console.error("Error deactivating logger:", error);
+    logger.error("Error deactivating logger:", error);
     if (interaction.replied || interaction.deferred) {
       await interaction.editReply("An error occurred while deactivating the logger.");
     } else {

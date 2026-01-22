@@ -1,6 +1,49 @@
-import { TextChannel } from 'discord.js';
+import { TextChannel, APIEmbed } from 'discord.js';
 import { TicketDocument } from '@/lib/database/ticket';
 import { Buffer } from 'buffer';
+
+// Types for transcript data structures
+interface TranscriptUser {
+	id: string;
+	name: string;
+	tag: string;
+	avatar: string;
+	display: string;
+}
+
+interface TranscriptAttachment {
+	url: string;
+	name?: string;
+	size: number;
+	height: number | null;
+	width: number | null;
+	contentType: string | null;
+}
+
+interface TranscriptEmbed {
+	title: string | null;
+	description: string | null;
+	fields: APIEmbed['fields'];
+	color: number | null;
+	footer?: string;
+	timestamp: string | null;
+}
+
+interface TranscriptReply {
+	author: string;
+	content: string;
+	id: string;
+}
+
+interface TranscriptMessage {
+	id: string;
+	content: string;
+	timestamp: string;
+	user_id: string;
+	attachments: TranscriptAttachment[];
+	embeds: TranscriptEmbed[];
+	replyTo: TranscriptReply | null;
+}
 
 export async function createTranscriptHtml(channel: TextChannel): Promise<Buffer> {
   const messages = await channel.messages.fetch({ limit: 100 });
@@ -11,8 +54,8 @@ export async function createTranscriptHtml(channel: TextChannel): Promise<Buffer
   const ownerUser = await channel.guild.members.fetch(ownerId).catch(() => null);
   const ownerTag = ownerUser ? `${ownerUser.user.globalName ?? ownerUser.user.username}#${ownerUser.user.discriminator}` : 'Unknown';
 
-  const users: Record<string, any> = {};
-  const messageLog: any[] = [];
+  const users: Record<string, TranscriptUser> = {};
+  const messageLog: TranscriptMessage[] = [];
 
   for (const [, msg] of sorted) {
     const author = msg.author;

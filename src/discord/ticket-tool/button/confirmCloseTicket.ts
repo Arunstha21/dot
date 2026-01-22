@@ -8,6 +8,7 @@ import {
   ChannelType,
   MessageFlags
 } from 'discord.js';
+import { logger } from '../../logger';
 
 export async function handleConfirmClose(interaction: ButtonInteraction) {
   const { channel, guild, user } = interaction;
@@ -78,7 +79,7 @@ export async function handleConfirmClose(interaction: ButtonInteraction) {
       }
     }
   } catch (err) {
-    console.error('Error closing ticket:', err);
+    logger.error('Error closing ticket:', err);
     await interaction.editReply({ content: '❌ Failed to close the ticket.', components: [] });
   }
 }

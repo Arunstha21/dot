@@ -50,11 +50,13 @@ export default function UsersManagement({ initialUsers }: { initialUsers: any[] 
   })
 
   useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect */
     if (updateState?.status === "error") toast.error(updateState.message)
     if (updateState?.status === "success" && updateState.message) {
       toast.success(updateState.message)
       setEditDialogOpen(false)
     }
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, [updateState])
 
   useEffect(() => {
@@ -63,12 +65,14 @@ export default function UsersManagement({ initialUsers }: { initialUsers: any[] 
   }, [deleteState])
 
   useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect */
     if (createState?.status === "error") toast.error(createState.message)
     if (createState?.status === "success" && createState.message) {
       toast.success(createState.message)
       form.reset()
       setCreateDialogOpen(false)
     }
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, [createState, form])
 
   const onSubmit = async (data: AddUserSchemaT) => {

@@ -1,8 +1,11 @@
 import { logger } from "@/discord/logger";
-import { MessageFlags } from "discord.js";
+import { MessageFlags, ChatInputCommandInteraction, ButtonInteraction, AnySelectMenuInteraction } from "discord.js";
+
+// Type union for interactions that can reply
+type ReplyableInteraction = ChatInputCommandInteraction | ButtonInteraction | AnySelectMenuInteraction;
 
 export const handleError = async (
-  interaction: any,
+  interaction: ReplyableInteraction,
   error: unknown,
   userMessage = 'An unexpected error occurred.'
 ) => {

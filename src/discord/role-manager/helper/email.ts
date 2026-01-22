@@ -30,7 +30,6 @@ async function refreshAccessToken(): Promise<void> {
 
         if (!response.ok) {
             logger.error('Failed to refresh access token');
-            console.error('Failed to refresh access token');
             return;
         }
 
@@ -40,7 +39,6 @@ async function refreshAccessToken(): Promise<void> {
         expiry = new Date(Date.now() + (expiry_in - 180) * 1000);
     } catch (error) {
         logger.error('Exception while refreshing access token:', error);
-        console.error('Exception while refreshing access token:', error);
     }
 }
 

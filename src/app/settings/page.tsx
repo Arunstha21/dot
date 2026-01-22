@@ -1,6 +1,5 @@
 import ProfileDropDown from "@/components/profileDropDown"
 import { Suspense } from "react"
-import listPointSystems, { listAllHierarchy } from "@/server/actions/events-actions"
 import { getServerSession } from "next-auth"
 import { authConfig } from "@/server/auth"
 import { redirect } from "next/navigation"
@@ -14,20 +13,16 @@ export default async function SettingsPage() {
     redirect("/")
   }
 
-  const [eventsData, usersData, pointSystemData] = await Promise.all([
-    listAllHierarchy(),
-    session.user.superUser ? listUsersServer().catch(() => []) : Promise.resolve([]),
-    listPointSystems()
-  ])
-
+  const usersData = session.user.superUser
+    ? await listUsersServer().catch(() => [])
+    : []
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between mb-4 sm:mb-2 mb-8">
         <div>
-          <h1 className="text-3xl font-bold">Settings & Management</h1>
-          <p className="text-muted-foreground mt-2">Manage and update all system records from this central hub</p>
+          <h1 className="text-3xl font-bold">Settings</h1>
+          <p className="text-muted-foreground mt-2">Manage your profile and preferences</p>
         </div>
          <div className="hidden sm:flex justify-end ml-4 mb-8">
           <ProfileDropDown page="settings" />
@@ -36,14 +31,11 @@ export default async function SettingsPage() {
 
       <Suspense fallback={<div>Loading...</div>}>
         <SettingsManager
-          initialEvents={eventsData.events}
           initialUsers={usersData}
           isSuperUser={!!session.user.superUser}
           currentUser={session.user}
-          availablePointSystems={pointSystemData}
         />
       </Suspense>
-    </div>
     </div>
   )
 }

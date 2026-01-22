@@ -63,6 +63,7 @@ export default function TeamsPlayersManagement({
 
   useEffect(() => {
     if (selectedGroup) loadTeams()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedGroup])
 
   const loadTeams = async () => {

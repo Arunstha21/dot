@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Loader2 } from 'lucide-react'
 import { EventData, getGroupData, GroupAndSchedule } from "@/server/publicResult"
 
 interface EventDialogProps {
@@ -20,6 +20,7 @@ interface EventDialogProps {
 export default function EventDialog({ open, onOpenChange, event, setSelectedData }: EventDialogProps) {
   const [selectedStage, setSelectedStage] = useState<EventData['stages'][number] | null>(null)
   const [step, setStep] = useState(1)
+  const [isLoadingGroup, setIsLoadingGroup] = useState(false)
 
   useEffect(() => {
     setSelectedStage(null)
@@ -32,6 +33,7 @@ export default function EventDialog({ open, onOpenChange, event, setSelectedData
   }
 
   const handleGroupSelect = async (group: EventData['stages'][number]['groups'][number]) => {
+    setIsLoadingGroup(true)
     try {
         const groupData = await getGroupData(group.id)
       setSelectedData({
@@ -42,6 +44,8 @@ export default function EventDialog({ open, onOpenChange, event, setSelectedData
       onOpenChange(false)
     } catch (err) {
       console.error("Failed to fetch group data", err)
+    } finally {
+      setIsLoadingGroup(false)
     }
   }
 
@@ -85,18 +89,25 @@ export default function EventDialog({ open, onOpenChange, event, setSelectedData
           </div>
         ) : (
           <>
-            <div className="grid gap-2 max-h-[300px] overflow-y-auto p-1">
-              {selectedStage?.groups?.map((group) => (
-                <Button
-                  key={group.id}
-                  variant="outline"
-                  className="justify-start h-auto py-3"
-                  onClick={() => handleGroupSelect(group)}
-                >
-                  {group.name}
-                </Button>
-              ))}
-            </div>
+            {isLoadingGroup ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin mr-2" />
+                <span>Loading group data...</span>
+              </div>
+            ) : (
+              <div className="grid gap-2 max-h-[300px] overflow-y-auto p-1">
+                {selectedStage?.groups?.map((group) => (
+                  <Button
+                    key={group.id}
+                    variant="outline"
+                    className="justify-start h-auto py-3"
+                    onClick={() => handleGroupSelect(group)}
+                  >
+                    {group.name}
+                  </Button>
+                ))}
+              </div>
+            )}
           </>
         )}
       </DialogContent>

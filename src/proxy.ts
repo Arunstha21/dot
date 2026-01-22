@@ -57,6 +57,17 @@ export async function proxy(req: NextRequest) {
 
     const pathname = req.nextUrl.pathname
 
+    // Handle root path: redirect based on auth status (must be BEFORE protected route check)
+    if (pathname === "/") {
+      const token = await getToken({ req, secret: AUTH_COOKIE_SECRET, secureCookie: process.env.NODE_ENV === "production" })
+      if (token) {
+        // User is logged in, redirect to dashboard
+        return NextResponse.redirect(new URL("/dashboard/compose-new", req.url))
+      }
+      // User is not logged in, stay on home page
+      return NextResponse.next()
+    }
+
     // only run heavy auth checks for protected routes
     const match = PROTECTED_MATCHERS.find((m) => m.pattern.test(pathname))
     if (!match) return NextResponse.next()
@@ -90,5 +101,5 @@ export async function proxy(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/admin/:path*", "/api/admin/:path*", "/adduser/:path*", "/settings/:path*"],
+  matcher: ["/", "/dashboard/:path*", "/admin/:path*", "/api/admin/:path*", "/adduser/:path*", "/settings/:path*"],
 }
